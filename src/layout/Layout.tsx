@@ -1,44 +1,20 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router";
 import { Search, Bell, Menu, X, User, LogOut, Settings, BookMarked, Home, Library, LayoutDashboard, Check } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import logoImg from "../../imports/mq1jioql-ANP.png";
+import { NotificationDropdown } from "./components/NotificationDropdown";
 
 export function Layout() {
   const { user, logout, hasPermission } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: "Your book upload 'Advanced Concrete Design' was approved.", read: false, time: "2m ago" },
-    { id: 2, text: "Engineer Kamel replied to your comment on Structural Analysis.", read: false, time: "1h ago" },
-    { id: 3, text: "System maintenance scheduled for tonight.", read: true, time: "1d ago" },
-  ]);
   const navigate = useNavigate();
   const location = useLocation();
-  const notifRef = useRef<HTMLDivElement>(null);
 
   const userName = user?.firstName ? `${user.firstName} ${user.lastName}` : (user?.username || 'User');
   const hasAdminDashboardAccess = hasPermission('APPROVE_USER') || hasPermission('UPLOAD_BOOK') || hasPermission('MODERATE_COMMENT') || hasPermission('MANAGE_ROLE');
 
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const markAsRead = (id: number) => {
-    setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
-  };
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
-        setShowNotifications(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  const hasAdminDashboardAccess = hasPermission('APPROVE_USER') || hasPermission('UPLOAD_BOOK') || hasPermission('MODERATE_COMMENT') || hasPermission('MANAGE_ROLE');
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -72,45 +48,7 @@ export function Layout() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">
-            <div className="relative" ref={notifRef}>
-              <button 
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 hover:bg-white/10 rounded-full relative transition-colors"
-              >
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                )}
-              </button>
-              
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 z-50 text-gray-800 border border-gray-100">
-                  <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-lg">
-                    <span className="font-bold text-sm">Notifications</span>
-                    <button onClick={markAllAsRead} className="text-xs text-[#00502D] hover:underline font-medium">Mark all read</button>
-                  </div>
-                  <div className="max-h-80 overflow-y-auto">
-                    {notifications.map(notif => (
-                      <div key={notif.id} className={`px-4 py-3 border-b border-gray-50 flex items-start gap-3 hover:bg-gray-50 transition-colors ${notif.read ? 'opacity-60' : 'bg-green-50/30'}`}>
-                        <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${notif.read ? 'bg-transparent' : 'bg-[#00502D]'}`}></div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-800">{notif.text}</p>
-                          <p className="text-xs text-gray-500 mt-1">{notif.time}</p>
-                        </div>
-                        {!notif.read && (
-                          <button onClick={() => markAsRead(notif.id)} className="p-1 hover:bg-gray-200 rounded text-gray-400 hover:text-green-600" title="Mark as read">
-                            <Check size={14} />
-                          </button>
-                        )}
-                      </div>
-                    ))}
-                    {notifications.length === 0 && (
-                      <div className="px-4 py-8 text-center text-sm text-gray-500">No notifications</div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
+            <NotificationDropdown />
             
             <div className="relative group cursor-pointer">
               <div className="flex items-center gap-2 p-1 pr-3 hover:bg-white/10 rounded-full transition-colors">
