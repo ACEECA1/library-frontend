@@ -1,8 +1,7 @@
 import { Outlet, Link, useNavigate, useLocation } from "react-router";
-import { Search, Bell, Menu, X, User, LogOut, Settings, BookMarked, Home, Library, LayoutDashboard, Check } from "lucide-react";
+import { Search, Bell, Menu, X, User, LogOut, Settings, BookMarked, Home, Library, LayoutDashboard, Check, BookOpen } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import logoImg from "../../imports/mq1jioql-ANP.png";
 import { NotificationDropdown } from "./components/NotificationDropdown";
 
 export function Layout() {
@@ -12,8 +11,6 @@ export function Layout() {
   const location = useLocation();
 
   const userName = user?.firstName ? `${user.firstName} ${user.lastName}` : (user?.username || 'User');
-  const hasAdminDashboardAccess = hasPermission('APPROVE_USER') || hasPermission('UPLOAD_BOOK') || hasPermission('MODERATE_COMMENT') || hasPermission('MANAGE_ROLE');
-
   const hasAdminDashboardAccess = hasPermission('APPROVE_USER') || hasPermission('UPLOAD_BOOK') || hasPermission('MODERATE_COMMENT') || hasPermission('MANAGE_ROLE');
 
   return (
@@ -29,7 +26,9 @@ export function Layout() {
               {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
             <Link to="/" className="flex items-center gap-3">
-              <img src={logoImg} alt="MDN Logo" className="h-10 object-contain bg-white rounded p-1" />
+              <div className="bg-white text-[#00502D] p-1.5 rounded-lg shadow-sm flex items-center justify-center">
+                <BookOpen size={24} />
+              </div>
               <span className="font-bold text-xl hidden sm:block tracking-wide">
                 Digital Library
               </span>
