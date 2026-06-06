@@ -34,7 +34,7 @@ export function RolesManagement() {
     e.preventDefault();
     if (!newRoleName.trim()) return;
     try {
-      await api.post('/admin/roles', { name: newRoleName, permissionNames: [] });
+      await api.post('/admin/roles', { name: newRoleName, permissions: [] });
       toast.success("Role created successfully");
       setNewRoleName("");
       fetchData();
@@ -50,7 +50,7 @@ export function RolesManagement() {
       : [...currentPermissions, permission];
 
     try {
-      await api.put(`/admin/roles/${roleId}`, { permissionNames: newPerms });
+      await api.put(`/admin/roles/${roleId}`, { permissions: newPerms });
       toast.success("Permissions updated");
       fetchData();
     } catch (err) {
