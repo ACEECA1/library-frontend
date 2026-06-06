@@ -1,9 +1,68 @@
-import { useState } from "react";
-import { Link } from "react-router";
-import { Filter, Star, Search, SlidersHorizontal } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router";
+import { Filter, Star, Search, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import api from "../../../lib/api";
 
 export function Browse() {
-  const [search, setSearch] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  const queryQ = searchParams.get("q") || "";
+  const querySortBy = searchParams.get("sortBy") || "createdAt";
+  const queryCategory = searchParams.get("category") || "";
+  const queryPage = parseInt(searchParams.get("page") || "0", 10);
+
+  const [search, setSearch] = useState(queryQ);
+  const [books, setBooks] = useState<any[]>([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.get('/metadata/categories')
+      .then(res => setCategories(res.data.data || []))
+      .catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/books/search', {
+          params: {
+            q: queryQ,
+            category: queryCategory,
+            sortBy: querySortBy,
+            page: queryPage,
+            size: 12
+          }
+        });
+        setBooks(res.data.data.content || []);
+        setTotalPages(res.data.data.totalPages || 0);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBooks();
+  }, [queryQ, queryCategory, querySortBy, queryPage]);
+
+  const updateParam = (key: string, value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value) {
+      newParams.set(key, value);
+    } else {
+      newParams.delete(key);
+    }
+    if (key !== 'page') newParams.delete('page');
+    setSearchParams(newParams);
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateParam("q", search);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
@@ -18,25 +77,26 @@ export function Browse() {
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">Categories</h3>
               <div className="space-y-2">
-                {["Structural", "Geotechnical", "Transportation", "Water Resources", "Construction"].map(cat => (
-                  <label key={cat} className="flex items-center gap-2 text-gray-700 cursor-pointer">
-                    <input type="checkbox" className="rounded text-[#00502D] focus:ring-[#00502D]" />
-                    {cat}
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-gray-900 mb-3">Minimum Rating</h3>
-              <div className="space-y-2">
-                {[4, 3, 2, 1].map(rating => (
-                  <label key={rating} className="flex items-center gap-2 text-gray-700 cursor-pointer">
-                    <input type="radio" name="rating" className="text-[#00502D] focus:ring-[#00502D]" />
-                    <div className="flex items-center gap-1">
-                      {Array(rating).fill(0).map((_, i) => <Star key={i} size={14} className="text-yellow-500" fill="currentColor" />)}
-                      <span className="text-sm">& up</span>
-                    </div>
+                <label className="flex items-center gap-2 text-gray-700 cursor-pointer">
+                  <input 
+                    type="radio" 
+                    name="category"
+                    checked={queryCategory === ""}
+                    onChange={() => updateParam("category", "")}
+                    className="rounded text-[#00502D] focus:ring-[#00502D]" 
+                  />
+                  All Categories
+                </label>
+                {categories.map(cat => (
+                  <label key={cat.id} className="flex items-center gap-2 text-gray-700 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="category"
+                      checked={queryCategory === cat.name}
+                      onChange={() => updateParam("category", cat.name)}
+                      className="rounded text-[#00502D] focus:ring-[#00502D]" 
+                    />
+                    {cat.name}
                   </label>
                 ))}
               </div>
@@ -50,7 +110,7 @@ export function Browse() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Catalog</h1>
           <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative flex-1 sm:w-64">
+            <form onSubmit={handleSearchSubmit} className="relative flex-1 sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
@@ -59,43 +119,68 @@ export function Browse() {
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full border border-gray-200 rounded-lg py-2 pl-9 pr-4 text-sm focus:outline-none focus:border-[#00502D] focus:ring-1 focus:ring-[#00502D]"
               />
-            </div>
-            <select className="border border-gray-200 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-[#00502D] bg-white">
-              <option>Newest First</option>
-              <option>Highest Rated</option>
-              <option>Most Viewed</option>
-              <option>A-Z</option>
+            </form>
+            <select 
+              value={querySortBy}
+              onChange={(e) => updateParam("sortBy", e.target.value)}
+              className="border border-gray-200 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-[#00502D] bg-white"
+            >
+              <option value="createdAt">Newest First</option>
+              <option value="popular">Most Viewed</option>
             </select>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {Array(12).fill(0).map((_, i) => (
-            <Link to={`/book/${i+1}`} key={i} className="group flex flex-col">
-              <div className="relative aspect-[2/3] mb-3 overflow-hidden rounded-lg shadow-sm bg-gray-200">
-                <div className="w-full h-full bg-gradient-to-br from-green-900/10 to-[#00502D]/20 flex items-center justify-center text-[#00502D] font-medium text-center p-4">
-                  Book Title {i+1}
-                </div>
-                <div className="absolute top-2 right-2 bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded shadow-sm text-gray-800 flex items-center gap-1">
-                  <Star size={12} className="text-yellow-500" fill="currentColor" />
-                  {(4 + Math.random()).toFixed(1)}
-                </div>
+        {loading ? (
+          <p className="text-gray-500">Loading books...</p>
+        ) : books.length === 0 ? (
+          <p className="text-gray-500">No books found matching your criteria.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {books.map((book) => (
+                <Link to={`/book/${book.id}`} key={book.id} className="group flex flex-col">
+                  <div className="relative aspect-[2/3] mb-3 overflow-hidden rounded-lg shadow-sm bg-gray-200">
+                    {book.thumbnailUrl ? (
+                      <img src={book.thumbnailUrl} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-green-900/10 to-[#00502D]/20 flex items-center justify-center text-[#00502D] font-medium text-center p-4">
+                        {book.title}
+                      </div>
+                    )}
+                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded shadow-sm text-gray-800 flex items-center gap-1">
+                      <Star size={12} className="text-yellow-500" fill="currentColor" />
+                      {book.averageRating ? book.averageRating.toFixed(1) : 'New'}
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-gray-900 leading-tight mb-1 group-hover:text-[#00502D] transition-colors line-clamp-2">{book.title}</h3>
+                  <p className="text-sm text-gray-500 truncate">{book.author}</p>
+                </Link>
+              ))}
+            </div>
+            
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-12 gap-2">
+                <button 
+                  onClick={() => updateParam("page", String(queryPage - 1))}
+                  disabled={queryPage === 0}
+                  className="px-3 py-2 border rounded text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <span className="px-4 py-2 text-sm font-medium">Page {queryPage + 1} of {totalPages}</span>
+                <button 
+                  onClick={() => updateParam("page", String(queryPage + 1))}
+                  disabled={queryPage >= totalPages - 1}
+                  className="px-3 py-2 border rounded text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  <ChevronRight size={18} />
+                </button>
               </div>
-              <h3 className="font-semibold text-gray-900 leading-tight mb-1 group-hover:text-[#00502D] transition-colors line-clamp-2">Book Title {i+1}</h3>
-              <p className="text-sm text-gray-500 truncate">Author Name</p>
-              <p className="text-xs text-gray-400 mt-1">Category</p>
-            </Link>
-          ))}
-        </div>
-        
-        {/* Pagination */}
-        <div className="flex justify-center mt-12 gap-2">
-          <button className="px-4 py-2 border rounded text-gray-500 hover:bg-gray-50 disabled:opacity-50">Previous</button>
-          <button className="px-4 py-2 bg-[#00502D] text-white rounded">1</button>
-          <button className="px-4 py-2 border rounded hover:bg-gray-50">2</button>
-          <button className="px-4 py-2 border rounded hover:bg-gray-50">3</button>
-          <button className="px-4 py-2 border rounded text-gray-500 hover:bg-gray-50">Next</button>
-        </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

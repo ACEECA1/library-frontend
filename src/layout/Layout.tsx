@@ -36,14 +36,21 @@ export function Layout() {
           </div>
 
           <div className="flex-1 max-w-xl mx-8 hidden md:block">
-            <div className="relative">
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const val = (e.currentTarget.elements.namedItem('q') as HTMLInputElement).value;
+              if (val.trim()) {
+                navigate(`/browse?q=${encodeURIComponent(val.trim())}`);
+              }
+            }} className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
+                name="q"
                 placeholder="Search for books, authors, or topics..."
                 className="w-full bg-white/10 border border-white/20 rounded-full py-2 pl-10 pr-4 text-white placeholder-white/70 focus:outline-none focus:bg-white focus:text-gray-900 focus:placeholder-gray-500 transition-all"
               />
-            </div>
+            </form>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4">

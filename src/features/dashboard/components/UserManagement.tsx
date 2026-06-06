@@ -13,10 +13,9 @@ export function UserManagement() {
 
   const fetchPendingUsers = async () => {
     try {
-      setPendingUsers([
-        {id: 1, name: 'Eng. Youssef', username: 'youssef@eng.dz'},
-        {id: 2, name: 'Dr. Amina', username: 'amina@eng.dz'}
-      ]);
+      setLoading(true);
+      const res = await api.get('/admin/users/pending');
+      setPendingUsers(res.data.data.content || []);
     } catch (err) {
       console.error(err);
     } finally {

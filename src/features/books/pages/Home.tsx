@@ -1,9 +1,33 @@
 import { Link } from "react-router";
 import { BookOpen, Star, Clock, ChevronRight, Upload, ShieldAlert, Users } from "lucide-react";
+import { useState, useEffect } from "react";
+import api from "../../../lib/api";
 
 export function Home() {
   const role = localStorage.getItem('userRole') || 'user';
   const userName = localStorage.getItem('userName') || 'User';
+
+  const [trending, setTrending] = useState<any[]>([]);
+  const [recent, setRecent] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const [recentRes, trendingRes] = await Promise.all([
+          api.get('/books?size=5&sort=createdAt,desc'),
+          api.get('/books/search?sortBy=popular&size=5')
+        ]);
+        setRecent(recentRes.data.data.content || []);
+        setTrending(trendingRes.data.data.content || []);
+      } catch (err) {
+        console.error("Failed to fetch books", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBooks();
+  }, []);
 
   return (
     <div className="pb-12">
@@ -51,11 +75,11 @@ export function Home() {
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Star className="text-yellow-500" fill="currentColor" /> Trending Books
           </h2>
-          <Link to="/browse?filter=trending" className="text-[#00502D] font-medium hover:underline flex items-center">
+          <Link to="/browse?sortBy=popular" className="text-[#00502D] font-medium hover:underline flex items-center">
             View All <ChevronRight size={16} />
           </Link>
         </div>
-        <BookGrid items={mockTrending} />
+        {loading ? <p className="text-gray-500">Loading...</p> : <BookGrid items={trending} />}
       </section>
 
       <section className="max-w-7xl mx-auto px-6 mt-16">
@@ -63,24 +87,25 @@ export function Home() {
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
             <Clock className="text-blue-500" /> Recently Added
           </h2>
-          <Link to="/browse?filter=recent" className="text-[#00502D] font-medium hover:underline flex items-center">
+          <Link to="/browse?sortBy=recent" className="text-[#00502D] font-medium hover:underline flex items-center">
             View All <ChevronRight size={16} />
           </Link>
         </div>
-        <BookGrid items={mockRecent} />
+        {loading ? <p className="text-gray-500">Loading...</p> : <BookGrid items={recent} />}
       </section>
     </div>
   );
 }
 
 function BookGrid({ items }: { items: any[] }) {
+  if (!items || items.length === 0) return <p className="text-gray-500">No books found.</p>;
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
       {items.map((book, i) => (
         <Link to={`/book/${book.id}`} key={i} className="group flex flex-col">
           <div className="relative aspect-[2/3] mb-3 overflow-hidden rounded-lg shadow-sm bg-gray-200">
-            {book.coverUrl ? (
-              <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            {book.thumbnailUrl ? (
+              <img src={book.thumbnailUrl} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
             ) : (
               <div className="w-full h-full bg-[#00502D]/10 flex items-center justify-center text-[#00502D] font-medium text-center p-4">
                 {book.title}
@@ -88,7 +113,7 @@ function BookGrid({ items }: { items: any[] }) {
             )}
             <div className="absolute top-2 right-2 bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded shadow-sm text-gray-800 flex items-center gap-1">
               <Star size={12} className="text-yellow-500" fill="currentColor" />
-              {book.rating.toFixed(1)}
+              {book.averageRating ? book.averageRating.toFixed(1) : 'New'}
             </div>
           </div>
           <h3 className="font-semibold text-gray-900 leading-tight mb-1 group-hover:text-[#00502D] transition-colors line-clamp-2">{book.title}</h3>
@@ -98,19 +123,3 @@ function BookGrid({ items }: { items: any[] }) {
     </div>
   );
 }
-
-const mockTrending = [
-  { id: 1, title: "Structural Analysis & Design", author: "Dr. Ahmed", rating: 4.8, coverUrl: "" },
-  { id: 2, title: "Geotechnical Engineering Principles", author: "Prof. Youssef", rating: 4.5, coverUrl: "" },
-  { id: 3, title: "Concrete Technology", author: "Civil Dept.", rating: 4.9, coverUrl: "" },
-  { id: 4, title: "Transportation & Highway Engineering", author: "Ministry of Public Works", rating: 4.2, coverUrl: "" },
-  { id: 5, title: "Fluid Mechanics & Hydraulics", author: "Prof. Kamel", rating: 5.0, coverUrl: "" },
-];
-
-const mockRecent = [
-  { id: 6, title: "Advanced Foundation Design", author: "Structural Institute", rating: 4.1, coverUrl: "" },
-  { id: 7, title: "Sustainable Construction Materials", author: "Dr. Sarah", rating: 4.4, coverUrl: "" },
-  { id: 8, title: "Urban Planning Guidelines", author: "Urban Development Dept.", rating: 4.7, coverUrl: "" },
-  { id: 9, title: "Water Resources Management", author: "Water Authority", rating: 4.3, coverUrl: "" },
-  { id: 10, title: "Steel Structures Handbook", author: "Engineering Council", rating: 4.6, coverUrl: "" },
-];
