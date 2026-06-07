@@ -50,7 +50,9 @@ export const bookApi = {
   uploadBook: (formData: FormData, onUploadProgress?: (progressEvent: any) => void) => api.post('/books', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress
-  })
+  }),
+  updateBook: (id: string | number, data: any) => api.put<ApiResponse<BookResponseDTO>>(`/books/${id}`, data),
+  deleteBook: (id: string | number) => api.delete<ApiResponse<void>>(`/books/${id}`)
 };
 
 export const commentApi = {

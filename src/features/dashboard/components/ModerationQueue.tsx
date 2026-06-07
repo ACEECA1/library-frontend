@@ -128,8 +128,18 @@ export function ModerationQueue() {
                   <Check size={16} /> Approve
                 </button>
                 <button 
+                  onClick={async () => {
+                    if(window.confirm("Are you sure you want to reject and delete this book?")) {
+                      try {
+                        await bookApi.deleteBook(book.id);
+                        toast.success("Book rejected and deleted");
+                        fetchData();
+                      } catch (err) {
+                        toast.error("Failed to reject book");
+                      }
+                    }
+                  }}
                   className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-red-100 text-red-600 px-4 py-2 rounded font-medium hover:bg-red-200"
-                  onClick={() => toast.info("Reject functionality to be implemented")}
                 >
                   <X size={16} /> Reject
                 </button>

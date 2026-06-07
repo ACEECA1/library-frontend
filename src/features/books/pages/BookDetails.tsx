@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router";
-import { Star, BookOpen, Bookmark, MessageSquare, Flag, ArrowLeft, Loader2 } from "lucide-react";
+import { Star, BookOpen, Bookmark, MessageSquare, Flag, ArrowLeft, Loader2, Edit, Trash2, Eye } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ReviewList } from "../components/ReviewList";
 import { CommentList } from "../components/CommentList";
@@ -7,14 +7,22 @@ import { bookApi, bookmarkApi } from "../../../lib/api";
 import { toast } from "sonner";
 import { SecureImage } from "@/components/SecureImage";
 import { ReportModal } from "../../../components/ReportModal";
+import { useAuth } from "../../../context/AuthContext";
+import { EditBookModal } from "../components/EditBookModal";
+
 export function BookDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, permissions } = useAuth();
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
   const [activeTab, setActiveTab] = useState<'reviews' | 'discussion'>('reviews');
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const canEditOrDelete = permissions?.includes("APPROVE_BOOK") || (book && user && book.uploaderUsername === user.username);
+
   useEffect(() => {
     const fetchBook = async () => {
       try {
@@ -48,6 +56,18 @@ export function BookDetails() {
       }
     } catch (err) {
       toast.error("Failed to update bookmark");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this book? This action cannot be undone.")) {
+      try {
+        await bookApi.deleteBook(id!);
+        toast.success("Book deleted successfully");
+        navigate("/browse");
+      } catch (err) {
+        toast.error("Failed to delete book");
+      }
     }
   };
 
@@ -94,6 +114,7 @@ export function BookDetails() {
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{book.title}</h1>
                 <p className="text-xl text-gray-600">by {book.author}</p>
+                <p className="text-sm text-gray-500 mt-1">Uploaded by: <span className="font-medium text-gray-700">{book.uploaderUsername || 'System'}</span></p>
                 {book.series && <p className="text-sm text-purple-600 font-medium mt-1">Series: {book.series.name}</p>}
               </div>
               <div className="flex flex-col items-center bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
@@ -102,6 +123,12 @@ export function BookDetails() {
                   <span className="font-bold text-xl text-gray-900">{book.averageRating?.toFixed(1) || '0.0'}</span>
                 </div>
                 <span className="text-xs text-gray-500">{book.reviewCount || 0} reviews</span>
+                <div className="flex flex-col items-center mt-2 pt-2 border-t border-gray-200 w-full text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Eye size={14} />
+                    <span className="text-xs font-medium">{book.views || 0} views</span>
+                  </div>
+                </div>
               </div>
             </div>
             <p className="text-gray-600 mt-6 leading-relaxed flex-1">
@@ -120,11 +147,30 @@ export function BookDetails() {
               </button>
               <button 
                 onClick={() => setReportModalOpen(true)}
-                className="p-3 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 border border-transparent transition-colors ml-auto group relative"
+                className={`p-3 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 border border-transparent transition-colors group relative ${!canEditOrDelete ? 'ml-auto' : ''}`}
               >
                 <Flag size={20} />
                 <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Report Content</span>
               </button>
+
+              {canEditOrDelete && (
+                <div className="flex gap-2 ml-auto">
+                  <button 
+                    onClick={() => setEditModalOpen(true)}
+                    className="p-3 text-gray-400 hover:text-blue-500 rounded-lg hover:bg-blue-50 border border-transparent transition-colors group relative"
+                  >
+                    <Edit size={20} />
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Edit Book</span>
+                  </button>
+                  <button 
+                    onClick={handleDelete}
+                    className="p-3 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 border border-transparent transition-colors group relative"
+                  >
+                    <Trash2 size={20} />
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Delete Book</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -161,6 +207,13 @@ export function BookDetails() {
         onClose={() => setReportModalOpen(false)} 
         targetType="BOOK" 
         targetId={book.id} 
+      />
+
+      <EditBookModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        book={book}
+        onSuccess={(updatedBook) => setBook(updatedBook)}
       />
     </div>
   );

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Filter, Star, Search, SlidersHorizontal, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { metadataApi, bookApi } from "../../../lib/api";
-import { SecureImage } from "@/components/SecureImage";
+import { BookCard } from "../components/BookCard";
 
 export function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -213,23 +213,12 @@ export function Browse() {
           <>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {books.map((book) => (
-                <Link to={`/book/${book.id}`} key={book.id} className="group flex flex-col bg-white p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                  <div className="relative aspect-[2/3] mb-3 overflow-hidden rounded-lg bg-gray-100">
-                    {book.thumbnailPath ? (
-                      <SecureImage src={`/books/${book.id}/thumbnail`} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-green-900/5 to-[#00502D]/10 flex items-center justify-center p-4">
-                        <BookOpen size={40} className="text-[#00502D]/20" />
-                      </div>
-                    )}
-                    <div className="absolute top-2 right-2 bg-white/95 backdrop-blur text-xs font-bold px-2 py-1 rounded-md shadow-sm text-gray-800 flex items-center gap-1 border border-gray-100/50">
-                      <Star size={12} className="text-yellow-500" fill="currentColor" />
-                      {book.averageRating ? book.averageRating.toFixed(1) : 'New'}
-                    </div>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 leading-tight mb-1 group-hover:text-[#00502D] transition-colors line-clamp-2">{book.title}</h3>
-                  <p className="text-xs text-gray-500 truncate">{book.author || 'Unknown Author'}</p>
-                </Link>
+                <BookCard 
+                  key={book.id} 
+                  book={book} 
+                  onBookDeleted={(id) => setBooks(books.filter(b => b.id !== id))}
+                  onBookUpdated={(updated) => setBooks(books.map(b => b.id === updated.id ? updated : b))}
+                />
               ))}
             </div>
             {totalPages > 1 && (

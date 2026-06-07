@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { bookmarkApi, bookApi } from '../../../lib/api';
 import { BookResponseDTO } from '../../../lib/types';
 import { SecureImage } from '@/components/SecureImage';
+import { BookCard } from '../components/BookCard';
 export function MyCollection() {
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [uploads, setUploads] = useState<BookResponseDTO[]>([]);
@@ -33,18 +34,25 @@ export function MyCollection() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {bookmarks.map((bookmark) => (
-                <Link to={`/book/${bookmark.bookId}`} key={bookmark.id} className="group flex flex-col">
-                  <div className="relative aspect-[2/3] mb-3 overflow-hidden rounded-lg shadow-sm bg-gray-200">
-                    {bookmark.bookThumbnailPath ? (
-                      <SecureImage src={`/books/${bookmark.bookId}/thumbnail`} alt={bookmark.bookTitle} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-full bg-[#00502D]/10 flex items-center justify-center text-[#00502D] font-medium text-center p-4">
-                        {bookmark.bookTitle}
-                      </div>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-gray-900 leading-tight mb-1 group-hover:text-[#00502D] transition-colors line-clamp-2">{bookmark.bookTitle}</h3>
-                </Link>
+                <BookCard 
+                  key={bookmark.id} 
+                  book={{
+                    id: bookmark.bookId,
+                    title: bookmark.bookTitle,
+                    thumbnailPath: bookmark.bookThumbnailPath,
+                    author: bookmark.bookAuthor,
+                    averageRating: bookmark.bookAverageRating,
+                    uploaderUsername: bookmark.bookUploaderUsername,
+                    views: bookmark.bookViews
+                  }}
+                  onBookDeleted={(id) => setBookmarks(bookmarks.filter(b => b.bookId !== id))}
+                  onBookUpdated={(updated) => setBookmarks(bookmarks.map(b => b.bookId === updated.id ? { 
+                    ...b, 
+                    bookTitle: updated.title, 
+                    bookThumbnailPath: updated.thumbnailPath,
+                    bookAuthor: updated.author
+                  } : b))}
+                />
               ))}
             </div>
           )}
@@ -61,27 +69,12 @@ export function MyCollection() {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {uploads.map((book) => (
-                <Link to={`/book/${book.id}`} key={book.id} className="group flex flex-col">
-                  <div className="relative aspect-[2/3] mb-3 overflow-hidden rounded-lg shadow-sm bg-gray-200">
-                    {book.thumbnailPath ? (
-                      <SecureImage src={`/books/${book.id}/thumbnail`} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <div className="w-full h-full bg-[#00502D]/10 flex items-center justify-center text-[#00502D] font-medium text-center p-4">
-                        {book.title}
-                      </div>
-                    )}
-                    <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
-                      <span className={`px-2 py-1 text-xs font-bold rounded shadow-sm ${book.status === 'LIVE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {book.status}
-                      </span>
-                      <div className="bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded shadow-sm text-gray-800 flex items-center gap-1">
-                        <Star size={12} className="text-yellow-500" fill="currentColor" />
-                        {book.averageRating ? book.averageRating.toFixed(1) : 'New'}
-                      </div>
-                    </div>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 leading-tight mb-1 group-hover:text-[#00502D] transition-colors line-clamp-2">{book.title}</h3>
-                </Link>
+                <BookCard 
+                  key={book.id} 
+                  book={book} 
+                  onBookDeleted={(id) => setUploads(uploads.filter(b => b.id !== id))}
+                  onBookUpdated={(updated) => setUploads(uploads.map(b => b.id === updated.id ? updated : b))}
+                />
               ))}
             </div>
           )}
