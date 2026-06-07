@@ -90,7 +90,7 @@ export const metadataApi = {
 
 export const adminApi = {
   getPendingUsers: () => api.get<ApiResponse<PaginatedData<UserDTO>>>('/admin/users/pending'),
-  getUsers: () => api.get<ApiResponse<PaginatedData<UserDTO>>>('/admin/users'),
+  getUsers: (params?: any) => api.get<ApiResponse<PaginatedData<UserDTO>>>('/admin/users', { params }),
   getRoles: (params?: any) => api.get<ApiResponse<PaginatedData<RoleDTO>>>('/admin/roles', { params }),
   getPermissions: () => api.get<ApiResponse<any[]>>('/admin/roles/permissions'),
   approveUser: (id: string | number) => api.post(`/admin/users/${id}/approve`),
