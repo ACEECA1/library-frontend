@@ -77,7 +77,7 @@ export function ModerationQueue() {
               </div>
               <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                 <a 
-                  href={`/reader/${book.id}`}
+                  href={`/read/${book.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-blue-100 text-blue-600 px-4 py-2 rounded font-medium hover:bg-blue-200"
