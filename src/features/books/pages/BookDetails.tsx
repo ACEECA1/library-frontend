@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router";
+import { useParams, Link, useNavigate } from "react-router";
 import { Star, BookOpen, Bookmark, MessageSquare, Flag, ArrowLeft, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ReviewList } from "../components/ReviewList";
@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { SecureImage } from "@/components/SecureImage";
 export function BookDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
@@ -64,9 +65,9 @@ export function BookDetails() {
   }
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-      <Link to="/browse" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#00502D] mb-6">
-        <ArrowLeft size={16} /> Back to Catalog
-      </Link>
+      <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#00502D] mb-6">
+        <ArrowLeft size={16} /> Back
+      </button>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="flex flex-col md:flex-row">
           <div className="w-full md:w-1/3 bg-gray-50 p-8 flex items-center justify-center border-r border-gray-100">

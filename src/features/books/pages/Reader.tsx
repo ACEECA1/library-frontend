@@ -1,17 +1,52 @@
-import { useParams, Link } from "react-router";
-import { ArrowLeft, ZoomIn, ZoomOut, FileText } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router";
+import { ArrowLeft, ZoomIn, ZoomOut, Maximize, Minimize, FileText } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { bookApi } from "../../../lib/api";
 import { Document, Page, pdfjs } from 'react-pdf';
+
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+function LazyPage({ pageNumber, scale, onVisible }: { pageNumber: number, scale: number, onVisible: (p: number) => void }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+        if (entry.isIntersecting) {
+          onVisible(pageNumber);
+        }
+      },
+      { rootMargin: '1000px 0px' }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [pageNumber, onVisible]);
+
+  return (
+    <div ref={ref} style={{ minHeight: `${800 * scale}px`, marginBottom: '24px' }} className="flex justify-center w-full">
+      {isVisible ? (
+        <Page pageNumber={pageNumber} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} className="shadow-2xl bg-white" />
+      ) : (
+        <div className="bg-gray-800 animate-pulse" style={{ width: `${600 * scale}px`, height: `${800 * scale}px` }} />
+      )}
+    </div>
+  );
+}
+
 export function Reader() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [bookTitle, setBookTitle] = useState("Loading...");
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [scale, setScale] = useState(1.0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (id) {
       bookApi.getBook(id).then(res => {
@@ -33,6 +68,7 @@ export function Reader() {
       loadPdf();
     }
   }, [id]);
+
   useEffect(() => {
     return () => {
       if (pdfUrl) {
@@ -40,54 +76,74 @@ export function Reader() {
       }
     };
   }, [pdfUrl]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
   }
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current?.requestFullscreen().catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  const handleVisible = useCallback((p: number) => {
+    setPageNumber(p);
+  }, []);
+
   const zoomIn = () => setScale(prev => Math.min(prev + 0.2, 3.0));
   const zoomOut = () => setScale(prev => Math.max(prev - 0.2, 0.5));
-  const nextPage = () => setPageNumber(prev => Math.min(prev + 1, numPages || 1));
-  const prevPage = () => setPageNumber(prev => Math.max(prev - 1, 1));
+
   return (
-    <div className="h-screen flex flex-col bg-gray-900 text-gray-300">
+    <div ref={containerRef} className="h-screen flex flex-col bg-gray-900 text-gray-300 overflow-hidden">
       <div className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-4">
-          <Link to={`/book/${id}`} className="p-2 hover:bg-gray-700 rounded-lg transition-colors" title="Back to details">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-700 rounded-lg transition-colors" title="Back">
             <ArrowLeft size={20} className="text-gray-300" />
-          </Link>
+          </button>
           <div className="h-6 w-px bg-gray-600"></div>
           <h1 className="font-medium text-white truncate max-w-xs md:max-w-md">{bookTitle}</h1>
         </div>
         <div className="flex items-center gap-4">
           {numPages && (
             <div className="flex items-center gap-2 text-sm bg-gray-700 px-3 py-1 rounded-md">
-              <button onClick={prevPage} disabled={pageNumber <= 1} className="disabled:opacity-50">&lt;</button>
               <span>{pageNumber} / {numPages}</span>
-              <button onClick={nextPage} disabled={pageNumber >= numPages} className="disabled:opacity-50">&gt;</button>
             </div>
           )}
           <button onClick={zoomOut} className="p-2 hover:bg-gray-700 rounded-lg" title="Zoom Out"><ZoomOut size={20} /></button>
           <button onClick={zoomIn} className="p-2 hover:bg-gray-700 rounded-lg" title="Zoom In"><ZoomIn size={20} /></button>
-          <button className="p-2 hover:bg-gray-700 rounded-lg" title="Log Book Index" onClick={async () => {
-            try {
-              const res = await bookApi.getBookContent(id!);
-              console.log("Book Text Content:", res.data);
-              alert("Book index/content logged to browser console!");
-            } catch (e) {
-              alert("Failed to get book content.");
-            }
-          }}>
-            <FileText size={20} />
+          <button onClick={toggleFullscreen} className="p-2 hover:bg-gray-700 rounded-lg" title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
+            {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-auto bg-gray-900 relative flex justify-center p-4">
+      <div className="flex-1 overflow-auto bg-gray-900 relative p-4 flex flex-col items-center">
         {error ? (
           <div className="flex items-center justify-center h-full">
             <p className="text-red-400">{error}</p>
           </div>
         ) : pdfUrl ? (
-          <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess} className="flex justify-center" loading={<div className="text-white">Loading PDF...</div>}>
-            <Page pageNumber={pageNumber} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} className="shadow-2xl" />
+          <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess} className="w-full flex flex-col items-center" loading={<div className="text-white">Loading PDF...</div>}>
+            {numPages && Array.from(new Array(numPages), (el, index) => (
+              <LazyPage 
+                key={`page_${index + 1}`} 
+                pageNumber={index + 1} 
+                scale={scale} 
+                onVisible={handleVisible} 
+              />
+            ))}
           </Document>
         ) : (
           <div className="flex items-center justify-center h-full">
