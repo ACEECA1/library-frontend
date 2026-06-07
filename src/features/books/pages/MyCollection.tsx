@@ -10,7 +10,7 @@ export function MyCollection() {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     Promise.all([
-      bookmarkApi.getBookmarks().then(res => setBookmarks(res.data.data || [])).catch(err => console.error(err)),
+      bookmarkApi.getBookmarks().then(res => setBookmarks(res.data.data.content || [])).catch(err => console.error(err)),
       bookApi.getMyUploads().then(res => setUploads(res.data.data.content || [])).catch(err => console.error(err))
     ]).finally(() => setLoading(false));
   }, []);

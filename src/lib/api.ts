@@ -74,7 +74,7 @@ export const authApi = {
 };
 
 export const bookmarkApi = {
-  getBookmarks: () => api.get<ApiResponse<any[]>>('/bookmarks')
+  getBookmarks: () => api.get<ApiResponse<PaginatedData<any>>>('/bookmarks')
 };
 
 export const metadataApi = {
