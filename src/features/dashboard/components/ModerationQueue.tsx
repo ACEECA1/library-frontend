@@ -49,13 +49,41 @@ export function ModerationQueue() {
                     <Book className="text-gray-400" />
                   )}
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">{book.title}</h3>
-                  <p className="text-sm text-gray-500">by {book.author}</p>
-                  <p className="text-xs text-gray-400 mt-1">Uploaded by: {book.uploadedBy || 'Unknown'}</p>
+                  <p className="text-sm text-gray-600 font-medium">by {book.author}</p>
+                  
+                  {book.description && (
+                    <p className="text-sm text-gray-500 mt-2 line-clamp-2">{book.description}</p>
+                  )}
+                  
+                  {(book.categories?.length > 0 || book.tags?.length > 0) && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {book.categories?.map((cat: string) => (
+                        <span key={cat} className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] uppercase font-bold rounded">
+                          {cat}
+                        </span>
+                      ))}
+                      {book.tags?.map((tag: string) => (
+                        <span key={tag} className="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] rounded">
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-gray-400 mt-2">Uploaded by: <span className="font-medium text-gray-600">{book.uploaderUsername || 'Unknown'}</span></p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                <a 
+                  href={`/reader/${book.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-blue-100 text-blue-600 px-4 py-2 rounded font-medium hover:bg-blue-200"
+                >
+                  <Book size={16} /> Read
+                </a>
                 <button 
                   onClick={() => handleApprove(book.id)}
                   className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-green-600 text-white px-4 py-2 rounded font-medium hover:bg-green-700"
