@@ -46,6 +46,7 @@ export const bookApi = {
   getArchivedBooks: () => api.get<ApiResponse<PaginatedData<BookResponseDTO>>>('/books/archived'),
   getMyUploads: (params?: any) => api.get<ApiResponse<PaginatedData<BookResponseDTO>>>('/books/my-uploads', { params }),
   approveBook: (id: string | number) => api.post(`/books/${id}/approve`),
+  restoreBook: (id: string | number) => api.post(`/books/${id}/restore`),
   getBookContent: (id: string | number) => api.get(`/books/${id}/content`),
   getBookStream: (id: string | number) => api.get(`/books/${id}/stream`, { responseType: 'blob' }),
   uploadBook: (formData: FormData, onUploadProgress?: (progressEvent: any) => void) => api.post('/books', formData, {

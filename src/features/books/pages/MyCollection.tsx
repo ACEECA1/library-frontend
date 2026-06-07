@@ -5,7 +5,10 @@ import { bookmarkApi, bookApi } from '../../../lib/api';
 import { BookResponseDTO } from '../../../lib/types';
 import { SecureImage } from '@/components/SecureImage';
 import { BookCard } from '../components/BookCard';
+import { useTranslation } from 'react-i18next';
+
 export function MyCollection() {
+  const { t } = useTranslation();
   const [bookmarks, setBookmarks] = useState<any[]>([]);
   const [uploads, setUploads] = useState<BookResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,18 +22,18 @@ export function MyCollection() {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="flex items-center gap-3 mb-8 border-b border-gray-200 pb-4">
         <BookMarked size={28} className="text-[#00502D]" />
-        <h1 className="text-3xl font-bold text-gray-900">My Collection</h1>
+        <h1 className="text-3xl font-bold text-gray-900">{t('collection.title')}</h1>
       </div>
       <div className="space-y-12">
         <section>
           <div className="flex items-center gap-2 mb-4 mt-4">
             <BookMarked className="text-gray-700" size={20} />
-            <h2 className="text-xl font-bold text-gray-900">Saved Books</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('collection.savedBooks')}</h2>
           </div>
           {loading ? (
-            <p className="text-gray-500">Loading...</p>
+            <p className="text-gray-500">{t('collection.loading')}</p>
           ) : bookmarks.length === 0 ? (
-            <p className="text-gray-500">No books saved to your collection yet.</p>
+            <p className="text-gray-500">{t('collection.noSavedBooks')}</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {bookmarks.map((bookmark) => (
@@ -60,12 +63,12 @@ export function MyCollection() {
         <section>
           <div className="flex items-center gap-2 mb-4 mt-4">
             <UploadCloud className="text-gray-700" size={20} />
-            <h2 className="text-xl font-bold text-gray-900">My Uploads</h2>
+            <h2 className="text-xl font-bold text-gray-900">{t('collection.myUploads')}</h2>
           </div>
           {loading ? (
-            <p className="text-gray-500">Loading...</p>
+            <p className="text-gray-500">{t('collection.loading')}</p>
           ) : uploads.length === 0 ? (
-            <p className="text-gray-500">You haven't uploaded any books yet.</p>
+            <p className="text-gray-500">{t('collection.noUploads')}</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
               {uploads.map((book) => (

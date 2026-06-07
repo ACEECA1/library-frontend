@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { Plus, Trash2, Tag as TagIcon, Folder, Layers, BookOpen } from "lucide-react";
 import api, { metadataApi } from "../../../lib/api";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export function CategoryManagement() {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
   const [seriesList, setSeriesList] = useState<any[]>([]);
@@ -23,7 +25,7 @@ export function CategoryManagement() {
       setTags(tagRes.data.data || []);
       setSeriesList(serRes.data.data || []);
     } catch (err) {
-      toast.error("Failed to fetch metadata");
+      toast.error(t('categories.failedFetch'));
     }
   };
 
@@ -36,21 +38,21 @@ export function CategoryManagement() {
     if (!newCatName.trim()) return;
     try {
       await metadataApi.addCategory({ name: newCatName });
-      toast.success("Category created");
+      toast.success(t('categories.catCreated'));
       setNewCatName("");
       fetchData();
     } catch (err) {
-      toast.error("Failed to create category");
+      toast.error(t('categories.failedCreateCat'));
     }
   };
 
   const handleDeleteCategory = async (id: number) => {
     try {
       await api.delete(`/metadata/categories/${id}`);
-      toast.success("Category deleted");
+      toast.success(t('categories.catDeleted'));
       fetchData();
     } catch (err) {
-      toast.error("Failed to delete category");
+      toast.error(t('categories.failedDeleteCat'));
     }
   };
 
@@ -59,21 +61,21 @@ export function CategoryManagement() {
     if (!newTagName.trim()) return;
     try {
       await metadataApi.addTag({ name: newTagName });
-      toast.success("Tag created");
+      toast.success(t('categories.tagCreated'));
       setNewTagName("");
       fetchData();
     } catch (err) {
-      toast.error("Failed to create tag");
+      toast.error(t('categories.failedCreateTag'));
     }
   };
 
   const handleDeleteTag = async (id: number) => {
     try {
       await api.delete(`/metadata/tags/${id}`);
-      toast.success("Tag deleted");
+      toast.success(t('categories.tagDeleted'));
       fetchData();
     } catch (err) {
-      toast.error("Failed to delete tag");
+      toast.error(t('categories.failedDeleteTag'));
     }
   };
 
@@ -82,22 +84,22 @@ export function CategoryManagement() {
     if (!newSeriesName.trim()) return;
     try {
       await metadataApi.addSeries({ name: newSeriesName, description: newSeriesDesc });
-      toast.success("Series created");
+      toast.success(t('categories.seriesCreated'));
       setNewSeriesName("");
       setNewSeriesDesc("");
       fetchData();
     } catch (err) {
-      toast.error("Failed to create series");
+      toast.error(t('categories.failedCreateSeries'));
     }
   };
 
   const handleDeleteSeries = async (id: number) => {
     try {
       await api.delete(`/metadata/series/${id}`);
-      toast.success("Series deleted");
+      toast.success(t('categories.seriesDeleted'));
       fetchData();
     } catch (err) {
-      toast.error("Failed to delete series");
+      toast.error(t('categories.failedDeleteSeries'));
     }
   };
 
@@ -106,9 +108,9 @@ export function CategoryManagement() {
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
           <BookOpen className="text-[#00502D]" />
-          Metadata Management
+          {t('categories.title')}
         </h2>
-        <p className="text-gray-600">Organize and structure the library content by managing categories, tags, and series.</p>
+        <p className="text-gray-600">{t('categories.desc')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -119,8 +121,8 @@ export function CategoryManagement() {
               <Folder size={20} />
             </div>
             <div>
-              <h3 className="font-bold text-gray-800 text-lg">Categories</h3>
-              <p className="text-xs text-gray-500">Broad classifications</p>
+              <h3 className="font-bold text-gray-800 text-lg">{t('categories.categories')}</h3>
+              <p className="text-xs text-gray-500">{t('categories.categoriesSub')}</p>
             </div>
           </div>
           
@@ -130,7 +132,7 @@ export function CategoryManagement() {
                 type="text" 
                 value={newCatName}
                 onChange={e => setNewCatName(e.target.value)}
-                placeholder="New Category Name..." 
+                placeholder={t('categories.newCatName')} 
                 className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00502D]/20 focus:border-[#00502D] transition-all"
               />
               <button 
@@ -138,7 +140,7 @@ export function CategoryManagement() {
                 disabled={!newCatName.trim()}
                 className="bg-[#00502D] text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-[#003a20] transition-colors disabled:opacity-50 shadow-sm flex items-center gap-1.5"
               >
-                <Plus size={18} /> Add
+                <Plus size={18} /> {t('categories.add')}
               </button>
             </form>
           </div>
@@ -158,7 +160,7 @@ export function CategoryManagement() {
                 </div>
               ))}
               {categories.length === 0 && (
-                <div className="w-full text-center py-10 text-gray-400 italic text-sm">No categories created yet.</div>
+                <div className="w-full text-center py-10 text-gray-400 italic text-sm">{t('categories.noCategories')}</div>
               )}
             </div>
           </div>
@@ -171,8 +173,8 @@ export function CategoryManagement() {
               <TagIcon size={20} />
             </div>
             <div>
-              <h3 className="font-bold text-gray-800 text-lg">Tags</h3>
-              <p className="text-xs text-gray-500">Specific keywords</p>
+              <h3 className="font-bold text-gray-800 text-lg">{t('categories.tags')}</h3>
+              <p className="text-xs text-gray-500">{t('categories.tagsSub')}</p>
             </div>
           </div>
           
@@ -182,7 +184,7 @@ export function CategoryManagement() {
                 type="text" 
                 value={newTagName}
                 onChange={e => setNewTagName(e.target.value)}
-                placeholder="New Tag Name..." 
+                placeholder={t('categories.newTagName')} 
                 className="flex-1 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00502D]/20 focus:border-[#00502D] transition-all"
               />
               <button 
@@ -190,7 +192,7 @@ export function CategoryManagement() {
                 disabled={!newTagName.trim()}
                 className="bg-[#00502D] text-white px-4 py-2.5 rounded-xl text-sm font-medium hover:bg-[#003a20] transition-colors disabled:opacity-50 shadow-sm flex items-center gap-1.5"
               >
-                <Plus size={18} /> Add
+                <Plus size={18} /> {t('categories.add')}
               </button>
             </form>
           </div>
@@ -210,7 +212,7 @@ export function CategoryManagement() {
                 </div>
               ))}
               {tags.length === 0 && (
-                <div className="w-full text-center py-10 text-gray-400 italic text-sm">No tags created yet.</div>
+                <div className="w-full text-center py-10 text-gray-400 italic text-sm">{t('categories.noTags')}</div>
               )}
             </div>
           </div>
@@ -224,30 +226,30 @@ export function CategoryManagement() {
             <Layers size={20} />
           </div>
           <div>
-            <h3 className="font-bold text-gray-800 text-lg">Book Series</h3>
-            <p className="text-xs text-gray-500">Group related books together</p>
+            <h3 className="font-bold text-gray-800 text-lg">{t('categories.series')}</h3>
+            <p className="text-xs text-gray-500">{t('categories.seriesSub')}</p>
           </div>
         </div>
         
         <div className="p-6 border-b border-gray-100 bg-white">
           <form onSubmit={handleCreateSeries} className="flex flex-col md:flex-row gap-4 items-end">
             <div className="w-full md:w-1/3">
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Series Name</label>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">{t('categories.seriesName')}</label>
               <input 
                 type="text" 
                 value={newSeriesName}
                 onChange={e => setNewSeriesName(e.target.value)}
-                placeholder="e.g. Harry Potter" 
+                placeholder={t('categories.seriesNamePlaceholder')} 
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00502D]/20 focus:border-[#00502D] transition-all"
               />
             </div>
             <div className="w-full md:flex-1">
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Description (Optional)</label>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">{t('categories.descOptional')}</label>
               <input 
                 type="text" 
                 value={newSeriesDesc}
                 onChange={e => setNewSeriesDesc(e.target.value)}
-                placeholder="Brief description about the series..." 
+                placeholder={t('categories.descPlaceholder')} 
                 className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#00502D]/20 focus:border-[#00502D] transition-all"
               />
             </div>
@@ -256,7 +258,7 @@ export function CategoryManagement() {
               disabled={!newSeriesName.trim()}
               className="w-full md:w-auto bg-[#00502D] text-white px-6 py-2.5 rounded-xl text-sm font-bold hover:bg-[#003a20] transition-colors disabled:opacity-50 shadow-sm flex items-center justify-center gap-2"
             >
-              <Plus size={18} /> Create Series
+              <Plus size={18} /> {t('categories.createSeries')}
             </button>
           </form>
         </div>
@@ -269,7 +271,7 @@ export function CategoryManagement() {
                 {s.description ? (
                   <p className="text-gray-500 text-sm mt-1 line-clamp-2">{s.description}</p>
                 ) : (
-                  <p className="text-gray-400 text-sm mt-1 italic">No description provided</p>
+                  <p className="text-gray-400 text-sm mt-1 italic">{t('categories.noDesc')}</p>
                 )}
                 
                 <button 
@@ -283,7 +285,7 @@ export function CategoryManagement() {
             ))}
             {seriesList.length === 0 && (
               <div className="col-span-full text-center py-12 text-gray-400 italic text-sm border-2 border-dashed border-gray-200 rounded-xl">
-                No series created yet. Add one above.
+                {t('categories.noSeries')}
               </div>
             )}
           </div>

@@ -9,15 +9,19 @@ import { SecureImage } from "@/components/SecureImage";
 import { ReportModal } from "../../../components/ReportModal";
 import { useAuth } from "../../../context/AuthContext";
 import { EditBookModal } from "../components/EditBookModal";
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router";
 
 export function BookDetails() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, permissions } = useAuth();
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
-  const [activeTab, setActiveTab] = useState<'reviews' | 'discussion'>('reviews');
+  const [activeTab, setActiveTab] = useState(location.state?.tab || 'reviews');
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
@@ -30,8 +34,11 @@ export function BookDetails() {
         const res = await bookApi.getBook(id!);
         setBook(res.data.data);
         setBookmarked(res.data.data.bookmarked || false);
+        if (location.state?.tab) {
+          setActiveTab(location.state.tab);
+        }
       } catch (err) {
-        toast.error("Failed to load book details");
+        toast.error(t('bookDetails.loadFailed'));
       } finally {
         setLoading(false);
       }
@@ -47,26 +54,26 @@ export function BookDetails() {
         }
         setBookmarked(false);
         setBook((prev: any) => ({ ...prev, bookmarked: false, userBookmarkId: undefined }));
-        toast.success("Bookmark removed");
+        toast.success(t('bookDetails.bookmarkRemoved'));
       } else {
         const res = await bookmarkApi.addBookmark(id!);
         setBookmarked(true);
         setBook((prev: any) => ({ ...prev, bookmarked: true, userBookmarkId: res.data.data.id }));
-        toast.success("Bookmarked successfully");
+        toast.success(t('bookDetails.bookmarkAdded'));
       }
     } catch (err) {
-      toast.error("Failed to update bookmark");
+      toast.error(t('bookDetails.bookmarkUpdateFailed'));
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this book? This action cannot be undone.")) {
+    if (window.confirm(t('bookDetails.deleteConfirm'))) {
       try {
         await bookApi.deleteBook(id!);
-        toast.success("Book deleted successfully");
+        toast.success(t('bookDetails.deleteSuccess'));
         navigate("/browse");
       } catch (err) {
-        toast.error("Failed to delete book");
+        toast.error(t('bookDetails.deleteFailed'));
       }
     }
   };
@@ -81,14 +88,14 @@ export function BookDetails() {
   if (!book) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-8 text-center text-gray-500">
-        Book not found.
+        {t('bookDetails.notFound')}
       </div>
     );
   }
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <button onClick={() => navigate(-1)} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#00502D] mb-6">
-        <ArrowLeft size={16} /> Back
+        <ArrowLeft size={16} /> {t('bookDetails.back')}
       </button>
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="flex flex-col md:flex-row">
@@ -113,44 +120,44 @@ export function BookDetails() {
                   ))}
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{book.title}</h1>
-                <p className="text-xl text-gray-600">by {book.author}</p>
-                <p className="text-sm text-gray-500 mt-1">Uploaded by: <span className="font-medium text-gray-700">{book.uploaderUsername || 'System'}</span></p>
-                {book.series && <p className="text-sm text-purple-600 font-medium mt-1">Series: {book.series.name}</p>}
+                <p className="text-xl text-gray-600">{t('bookDetails.by', { author: book.author })}</p>
+                <p className="text-sm text-gray-500 mt-1">{t('bookDetails.uploadedBy')} <span className="font-medium text-gray-700">{book.uploaderUsername || t('bookDetails.system')}</span></p>
+                {book.series && <p className="text-sm text-purple-600 font-medium mt-1">{t('bookDetails.series', { name: book.series.name })}</p>}
               </div>
               <div className="flex flex-col items-center bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">
                 <div className="flex items-center gap-1 text-yellow-500">
                   <Star fill="currentColor" size={20} />
                   <span className="font-bold text-xl text-gray-900">{book.averageRating?.toFixed(1) || '0.0'}</span>
                 </div>
-                <span className="text-xs text-gray-500">{book.reviewCount || 0} reviews</span>
+                <span className="text-xs text-gray-500">{t('bookDetails.reviewsCount', { count: book.reviewCount || 0 })}</span>
                 <div className="flex flex-col items-center mt-2 pt-2 border-t border-gray-200 w-full text-gray-500">
                   <div className="flex items-center gap-1">
                     <Eye size={14} />
-                    <span className="text-xs font-medium">{book.views || 0} views</span>
+                    <span className="text-xs font-medium">{t('bookDetails.viewsCount', { count: book.views || 0 })}</span>
                   </div>
                 </div>
               </div>
             </div>
             <p className="text-gray-600 mt-6 leading-relaxed flex-1">
-              {book.description || 'No description available for this book.'}
+              {book.description || t('bookDetails.noDescription')}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link to={`/read/${id}`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#00502D] text-white px-8 py-3 rounded-lg font-bold hover:bg-green-800 transition-colors shadow-sm">
-                <BookOpen size={20} /> Read Now
+                <BookOpen size={20} /> {t('bookDetails.readNow')}
               </Link>
               <button 
                 onClick={handleBookmarkToggle}
                 className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-bold border transition-colors ${bookmarked ? 'bg-green-50 text-[#00502D] border-green-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
               >
                 <Bookmark size={20} fill={bookmarked ? "currentColor" : "none"} /> 
-                {bookmarked ? 'Saved' : 'Bookmark'}
+                {bookmarked ? t('bookDetails.saved') : t('bookDetails.bookmark')}
               </button>
               <button 
                 onClick={() => setReportModalOpen(true)}
                 className={`p-3 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 border border-transparent transition-colors group relative ${!canEditOrDelete ? 'ml-auto' : ''}`}
               >
                 <Flag size={20} />
-                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Report Content</span>
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">{t('bookDetails.reportContent')}</span>
               </button>
 
               {canEditOrDelete && (
@@ -160,14 +167,14 @@ export function BookDetails() {
                     className="p-3 text-gray-400 hover:text-blue-500 rounded-lg hover:bg-blue-50 border border-transparent transition-colors group relative"
                   >
                     <Edit size={20} />
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Edit Book</span>
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">{t('bookDetails.editBook')}</span>
                   </button>
                   <button 
                     onClick={handleDelete}
                     className="p-3 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 border border-transparent transition-colors group relative"
                   >
                     <Trash2 size={20} />
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Delete Book</span>
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">{t('bookDetails.deleteBook')}</span>
                   </button>
                 </div>
               )}
@@ -182,14 +189,14 @@ export function BookDetails() {
             className={`pb-3 font-bold text-lg flex items-center gap-2 transition-colors ${activeTab === 'reviews' ? 'border-b-2 border-[#00502D] text-[#00502D]' : 'text-gray-500 hover:text-gray-800'}`}
           >
             <Star size={20} className={activeTab === 'reviews' ? 'text-yellow-500 fill-current' : ''} /> 
-            Reviews
+            {t('bookDetails.reviews')}
           </button>
           <button 
             onClick={() => setActiveTab('discussion')}
             className={`pb-3 font-bold text-lg flex items-center gap-2 transition-colors ${activeTab === 'discussion' ? 'border-b-2 border-[#00502D] text-[#00502D]' : 'text-gray-500 hover:text-gray-800'}`}
           >
             <MessageSquare size={20} /> 
-            Discussion
+            {t('bookDetails.discussion')}
           </button>
         </div>
         {activeTab === 'reviews' ? (

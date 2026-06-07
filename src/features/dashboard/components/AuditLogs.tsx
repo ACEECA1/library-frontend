@@ -4,8 +4,10 @@ import {
   UploadCloud, BookOpen, MessageSquare, AlertTriangle, ShieldCheck, 
   Shield, UserCheck, UserX, Clock, Key, Activity
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function AuditLogs() {
+  const { t } = useTranslation();
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,16 +59,16 @@ export function AuditLogs() {
     }
   };
 
-  if (loading) return <div className="text-gray-500 p-4">Loading audit logs...</div>;
+  if (loading) return <div className="text-gray-500 p-4">{t('audit.loading')}</div>;
 
   return (
     <div>
-      <h2 className="text-xl font-bold mb-6 text-gray-800 border-b pb-2">System Audit Logs</h2>
+      <h2 className="text-xl font-bold mb-6 text-gray-800 border-b pb-2">{t('audit.title')}</h2>
       
       <div className="space-y-4">
         {logs.length === 0 ? (
           <div className="text-center py-10 bg-gray-50 rounded-lg text-gray-500 border border-gray-100">
-            No audit logs found.
+            {t('audit.noLogs')}
           </div>
         ) : (
           logs.map((log, i) => {

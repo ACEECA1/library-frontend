@@ -1,6 +1,7 @@
 import { Check, ThumbsUp, ThumbsDown, BookOpen, Info, MessageSquare, AlertCircle, Clock, Star, ShieldCheck, UserCheck, Shield, Reply } from "lucide-react";
+import { useNavigate } from "react-router";
 
-export function NotificationItem({ notification, onMarkRead }: { notification: any, onMarkRead: (id: number) => void }) {
+export function NotificationItem({ notification, onMarkRead, onClick }: { notification: any, onMarkRead: (id: number) => void, onClick?: () => void }) {
   const getTypeConfig = (type: string) => {
     switch (type) {
       case 'UPVOTE':
@@ -45,8 +46,18 @@ export function NotificationItem({ notification, onMarkRead }: { notification: a
     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   };
 
+  const handleClick = () => {
+    if (!notification.read) onMarkRead(notification.id);
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
-    <div className={`group px-4 py-3 flex items-start gap-3 transition-colors border-b border-gray-100 relative ${notification.read ? 'hover:bg-gray-50' : 'bg-[#00502D]/5 hover:bg-[#00502D]/10'}`}>
+    <div 
+      onClick={handleClick}
+      className={`group px-4 py-3 flex items-start gap-3 transition-colors border-b border-gray-100 relative cursor-pointer ${notification.read ? 'hover:bg-gray-50' : 'bg-[#00502D]/5 hover:bg-[#00502D]/10'}`}
+    >
       {!notification.read && (
         <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#00502D]"></div>
       )}
@@ -68,7 +79,10 @@ export function NotificationItem({ notification, onMarkRead }: { notification: a
       </div>
       {!notification.read && (
         <button 
-          onClick={() => onMarkRead(notification.id)} 
+          onClick={(e) => {
+            e.stopPropagation();
+            onMarkRead(notification.id);
+          }} 
           className="shrink-0 p-1.5 rounded-full text-gray-400 hover:bg-[#00502D] hover:text-white transition-all opacity-0 group-hover:opacity-100 focus:opacity-100" 
           title="Mark as read"
         >

@@ -6,8 +6,10 @@ import { useState } from "react";
 import { EditBookModal } from "./EditBookModal";
 import { bookApi } from "../../../lib/api";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export function BookCard({ book, onBookDeleted, onBookUpdated }: { book: any, onBookDeleted?: (id: number) => void, onBookUpdated?: (book: any) => void }) {
+  const { t } = useTranslation();
   const { user, permissions } = useAuth();
   const [editModalOpen, setEditModalOpen] = useState(false);
 
@@ -16,13 +18,13 @@ export function BookCard({ book, onBookDeleted, onBookUpdated }: { book: any, on
   const handleDelete = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (window.confirm("Are you sure you want to delete this book? This action cannot be undone.")) {
+    if (window.confirm(t('bookCard.deleteConfirm'))) {
       try {
         await bookApi.deleteBook(book.id);
-        toast.success("Book deleted successfully");
+        toast.success(t('bookCard.deleteSuccess'));
         if (onBookDeleted) onBookDeleted(book.id);
       } catch (err) {
-        toast.error("Failed to delete book");
+        toast.error(t('bookCard.deleteFailed'));
       }
     }
   };
@@ -53,15 +55,15 @@ export function BookCard({ book, onBookDeleted, onBookUpdated }: { book: any, on
 
           <div className="absolute top-2 right-2 bg-white/95 backdrop-blur text-xs font-bold px-2 py-1 rounded-md shadow-sm text-gray-800 flex items-center gap-1 border border-gray-100/50">
             <Star size={12} className="text-yellow-500" fill="currentColor" />
-            {book.averageRating ? book.averageRating.toFixed(1) : 'New'}
+            {book.averageRating ? book.averageRating.toFixed(1) : t('bookCard.new')}
           </div>
           
           {canEditOrDelete && (
             <div className="absolute top-2 left-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={handleEditClick} className="p-1.5 bg-white/90 hover:bg-blue-50 text-blue-600 rounded shadow backdrop-blur transition-colors border border-gray-100" title="Edit Book">
+              <button onClick={handleEditClick} className="p-1.5 bg-white/90 hover:bg-blue-50 text-blue-600 rounded shadow backdrop-blur transition-colors border border-gray-100" title={t('bookCard.editBook')}>
                 <Edit size={14} />
               </button>
-              <button onClick={handleDelete} className="p-1.5 bg-white/90 hover:bg-red-50 text-red-600 rounded shadow backdrop-blur transition-colors border border-gray-100" title="Delete Book">
+              <button onClick={handleDelete} className="p-1.5 bg-white/90 hover:bg-red-50 text-red-600 rounded shadow backdrop-blur transition-colors border border-gray-100" title={t('bookCard.deleteBook')}>
                 <Trash2 size={14} />
               </button>
             </div>
@@ -69,10 +71,10 @@ export function BookCard({ book, onBookDeleted, onBookUpdated }: { book: any, on
         </div>
         
         <h3 className="font-semibold text-gray-900 leading-tight mb-1 group-hover:text-[#00502D] transition-colors line-clamp-2">{book.title}</h3>
-        <p className="text-xs text-gray-500 truncate mb-3">{book.author || 'Unknown Author'}</p>
+        <p className="text-xs text-gray-500 truncate mb-3">{book.author || t('bookCard.unknownAuthor')}</p>
         
         <div className="mt-auto pt-2 border-t border-gray-100 flex items-center justify-between text-[10px] text-gray-400">
-          <span className="truncate max-w-[100px]" title={book.uploaderUsername}>By {book.uploaderUsername || 'System'}</span>
+          <span className="truncate max-w-[100px]" title={book.uploaderUsername}>{t('bookCard.by', { uploader: book.uploaderUsername || t('bookCard.system') })}</span>
           <div className="flex items-center gap-1 shrink-0">
             <Eye size={12} />
             {book.views || 0}

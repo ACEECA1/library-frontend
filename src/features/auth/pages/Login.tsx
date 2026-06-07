@@ -4,7 +4,10 @@ import { useState } from "react";
 import { authApi } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
 import logoImg from "../../../imports/mq1jioql-ANP.png";
+import { useTranslation } from "react-i18next";
+
 export function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { login } = useAuth();
   const [username, setUsername] = useState("");
@@ -21,10 +24,10 @@ export function Login() {
         await login(response.data.data.accessToken);
         navigate('/');
       } else {
-        setError("Invalid response from server.");
+        setError(t('auth.invalidResponse'));
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || "Login failed. Please check your credentials.");
+      setError(err.response?.data?.message || t('auth.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -35,8 +38,8 @@ export function Login() {
         <div className="bg-[#00502D] p-8 flex flex-col items-center justify-center text-white relative">
           <div className="relative z-10 flex flex-col items-center">
             <img src={logoImg} alt="MDN Logo" className="h-16 object-contain bg-white rounded p-1 mb-4 shadow-lg" />
-            <h2 className="text-2xl font-bold tracking-wide">Welcome Back</h2>
-            <p className="text-green-100 text-sm mt-1">Digital Library Management System</p>
+            <h2 className="text-2xl font-bold tracking-wide">{t('auth.welcomeBack')}</h2>
+            <p className="text-green-100 text-sm mt-1">{t('auth.systemSubtitle')}</p>
           </div>
         </div>
         <div className="p-8">
@@ -47,7 +50,7 @@ export function Login() {
           )}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.username')}</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
@@ -55,15 +58,15 @@ export function Login() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                  placeholder="Enter your username"
+                  placeholder={t('auth.enterUsername')}
                   required
                 />
               </div>
             </div>
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <a href="#" className="text-xs text-[#00502D] hover:underline font-medium">Forgot Password?</a>
+                <label className="block text-sm font-medium text-gray-700">{t('auth.password')}</label>
+                <a href="#" className="text-xs text-[#00502D] hover:underline font-medium">{t('auth.forgotPassword')}</a>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -78,11 +81,11 @@ export function Login() {
               </div>
             </div>
             <button disabled={loading} type="submit" className="w-full bg-[#00502D] text-white py-3 rounded-lg font-bold hover:bg-green-800 transition-colors shadow-md mt-2 disabled:opacity-70">
-              {loading ? "Signing In..." : "Sign In"}
+              {loading ? t('auth.signingIn') : t('auth.signIn')}
             </button>
           </form>
           <div className="mt-6 text-center text-sm text-gray-600">
-            Don't have an account? <Link to="/register" className="text-[#00502D] font-bold hover:underline">Request Access</Link>
+            {t('auth.noAccount')} <Link to="/register" className="text-[#00502D] font-bold hover:underline">{t('auth.requestAccess')}</Link>
           </div>
         </div>
       </div>

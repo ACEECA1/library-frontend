@@ -3,7 +3,10 @@ import { User, Lock, Calendar } from "lucide-react";
 import { useState } from "react";
 import { authApi } from "../../../lib/api";
 import logoImg from "../../../imports/mq1jioql-ANP.png";
+import { useTranslation } from "react-i18next";
+
 export function Register() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -18,7 +21,7 @@ export function Register() {
     e.preventDefault();
     setError("");
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t('auth.passwordsNotMatch'));
       return;
     }
     setLoading(true);
@@ -33,7 +36,7 @@ export function Register() {
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed. Please try again.");
+      setError(err.response?.data?.message || t('auth.registerFailed'));
     } finally {
       setLoading(false);
     }
@@ -44,8 +47,8 @@ export function Register() {
         <div className="bg-[#00502D] p-6 flex flex-col items-center justify-center text-white relative">
           <div className="relative z-10 flex flex-col items-center">
             <img src={logoImg} alt="MDN Logo" className="h-12 object-contain bg-white rounded p-1 mb-3 shadow-sm" />
-            <h2 className="text-xl font-bold tracking-wide">Request Account</h2>
-            <p className="text-green-100 text-xs mt-1 text-center max-w-[250px]">New accounts must be approved by an administrator before access is granted.</p>
+            <h2 className="text-xl font-bold tracking-wide">{t('auth.requestAccount')}</h2>
+            <p className="text-green-100 text-xs mt-1 text-center max-w-[250px]">{t('auth.requestSubtitle')}</p>
           </div>
         </div>
         <div className="p-6 sm:p-8">
@@ -56,13 +59,13 @@ export function Register() {
           )}
           {success && (
             <div className="mb-4 bg-green-50 text-green-700 text-sm p-3 rounded-md border border-green-200">
-              Registration successful! Please wait for admin approval. Redirecting...
+              {t('auth.registerSuccess')}
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.firstName')}</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                   <input 
@@ -70,13 +73,13 @@ export function Register() {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                    placeholder="First Name"
+                    placeholder={t('auth.firstName')}
                     required
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.lastName')}</label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                   <input 
@@ -84,14 +87,14 @@ export function Register() {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                     className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                    placeholder="Last Name"
+                    placeholder={t('auth.lastName')}
                     required
                   />
                 </div>
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.dateOfBirth')}</label>
               <div className="relative">
                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
@@ -104,7 +107,7 @@ export function Register() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.username')}</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
@@ -112,13 +115,13 @@ export function Register() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                  placeholder="Desired Username"
+                  placeholder={t('auth.desiredUsername')}
                   required
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.password')}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
@@ -132,7 +135,7 @@ export function Register() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.confirmPassword')}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                 <input 
@@ -146,11 +149,11 @@ export function Register() {
               </div>
             </div>
             <button disabled={loading || success} type="submit" className="w-full bg-[#00502D] text-white py-3 rounded-lg font-bold hover:bg-green-800 transition-colors shadow-md mt-4 disabled:opacity-70">
-              {loading ? "Submitting..." : "Submit Request"}
+              {loading ? t('auth.submitting') : t('auth.submitRequest')}
             </button>
           </form>
           <div className="mt-6 text-center text-sm text-gray-600">
-            Already approved? <Link to="/login" className="text-[#00502D] font-bold hover:underline">Sign In</Link>
+            {t('auth.alreadyApproved')} <Link to="/login" className="text-[#00502D] font-bold hover:underline">{t('auth.signIn')}</Link>
           </div>
         </div>
       </div>

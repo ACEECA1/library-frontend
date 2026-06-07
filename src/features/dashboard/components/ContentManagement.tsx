@@ -1,8 +1,13 @@
 import { useState, useEffect } from "react";
 import { Upload, FileText, Image as ImageIcon, CheckCircle } from "lucide-react";
-import { metadataApi, bookApi } from "../../../lib/api";
+import api, { bookApi, metadataApi } from "../../../lib/api";
+import { toast } from "sonner";
+import { useAuth } from "../../../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export function ContentManagement() {
+  const { t } = useTranslation();
+  const { hasPermission } = useAuth();
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [description, setDescription] = useState("");
@@ -14,17 +19,17 @@ export function ContentManagement() {
   const [tags, setTags] = useState<any[]>([]);
   const [series, setSeries] = useState<any[]>([]);
   
-  const [file, setFile] = useState<File | null>(null);
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [bookFile, setBookFile] = useState<File | null>(null);
+  const [coverImage, setCoverImage] = useState<File | null>(null);
   
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    fetchMetadata();
+    fetchData();
   }, []);
 
-  const fetchMetadata = async () => {
+  const fetchData = async () => {
     try {
       const [catRes, tagRes, seriesRes] = await Promise.all([
         metadataApi.getCategories(),
@@ -49,7 +54,7 @@ export function ContentManagement() {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !title || !author) return;
+    if (!bookFile || !title || !author) return;
     
     const formData = new FormData();
     formData.append("title", title);
@@ -58,27 +63,28 @@ export function ContentManagement() {
     selectedCategoryIds.forEach(id => formData.append("categoryIds", id));
     selectedTagIds.forEach(id => formData.append("tagIds", id));
     if (seriesId) formData.append("seriesId", seriesId);
-    formData.append("pdfFile", file);
-    if (thumbnailFile) formData.append("thumbnailFile", thumbnailFile);
+    formData.append("pdfFile", bookFile);
+    if (coverImage) formData.append("thumbnailFile", coverImage);
 
     setUploading(true);
     setSuccess(false);
     
     try {
       await bookApi.uploadBook(formData);
-      setSuccess(true);
+      toast.success(t('content.bookUploaded'));
+      
       setTitle("");
       setAuthor("");
       setDescription("");
       setSelectedCategoryIds([]);
       setSelectedTagIds([]);
       setSeriesId("");
-      setFile(null);
-      setThumbnailFile(null);
+      setBookFile(null);
+      setCoverImage(null);
       
-      setTimeout(() => setSuccess(false), 5000);
-    } catch (err) {
-      console.error("Upload failed", err);
+      fetchData();
+    } catch (err: any) {
+      toast.error(t('content.failedUpload'));
     } finally {
       setUploading(false);
     }
@@ -89,9 +95,9 @@ export function ContentManagement() {
       <div className="mb-8 border-b border-gray-200 pb-4">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
           <Upload className="text-[#00502D]" />
-          Upload New Book
+          {t('content.uploadBook')}
         </h2>
-        <p className="text-gray-600 mt-1">Add a new book to the library's pending queue for approval.</p>
+        <p className="text-gray-600 mt-1">{t('content.uploadDesc')}</p>
       </div>
 
       {success && (
@@ -106,32 +112,23 @@ export function ContentManagement() {
 
       <form onSubmit={handleUpload} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        {/* Left Column: Metadata */}
         <div className="lg:col-span-7 space-y-6">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-5">
             <h3 className="text-lg font-bold text-gray-800 border-b pb-2 mb-4">Book Details</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Title <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  value={title} onChange={e => setTitle(e.target.value)}
-                  placeholder="Enter book title"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#00502D]/20 focus:border-[#00502D] transition-all outline-none" 
-                  required 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Author <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  value={author} onChange={e => setAuthor(e.target.value)}
-                  placeholder="Enter author name"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-[#00502D]/20 focus:border-[#00502D] transition-all outline-none" 
-                  required 
-                />
-              </div>
+            <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('content.titleLabel')}</label>
+                  <input type="text" required value={title} onChange={e => setTitle(e.target.value)} placeholder={t('content.titlePlaceholder')} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00502D] focus:border-transparent outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('content.authorLabel')}</label>
+                  <input type="text" required value={author} onChange={e => setAuthor(e.target.value)} placeholder={t('content.authorPlaceholder')} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00502D] focus:border-transparent outline-none" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('content.descriptionLabel')}</label>
+                  <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder={t('content.descriptionPlaceholder')} className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#00502D] focus:border-transparent outline-none" rows={3}></textarea>
+                </div>
             </div>
 
             <div>
@@ -185,95 +182,30 @@ export function ContentManagement() {
                 })}
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description</label>
-              <textarea 
-                value={description} onChange={e => setDescription(e.target.value)}
-                placeholder="Write a brief synopsis or description..."
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-[#00502D]/20 focus:border-[#00502D] transition-all outline-none resize-none" 
-                rows={4}
-              />
-            </div>
           </div>
         </div>
 
-        {/* Right Column: Files */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-5">
             <h3 className="text-lg font-bold text-gray-800 border-b pb-2 mb-4">Book Files</h3>
             
-            {/* PDF Upload */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">PDF Document <span className="text-red-500">*</span></label>
-              <label className={`block border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all ${file ? 'border-[#00502D] bg-green-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'}`}>
-                <input 
-                  type="file" 
-                  accept="application/pdf"
-                  onChange={e => setFile(e.target.files?.[0] || null)}
-                  className="hidden"
-                  required
-                />
-                <div className="flex flex-col items-center justify-center gap-3">
-                  <div className={`p-3 rounded-full ${file ? 'bg-green-100 text-[#00502D]' : 'bg-white text-gray-400 shadow-sm'}`}>
-                    <FileText size={28} />
-                  </div>
-                  {file ? (
-                    <div>
-                      <p className="text-sm font-bold text-gray-800">{file.name}</p>
-                      <p className="text-xs text-gray-500 mt-1">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                    </div>
-                  ) : (
-                    <div>
-                      <p className="text-sm font-bold text-gray-700">Click to upload PDF</p>
-                      <p className="text-xs text-gray-500 mt-1">Only .pdf files are supported</p>
-                    </div>
-                  )}
+            <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('content.coverImage')}</label>
+                  <input type="file" accept="image/*" onChange={e => setCoverImage(e.target.files?.[0] || null)} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-[#00502D] hover:file:bg-green-100" />
                 </div>
-              </label>
-            </div>
-
-            {/* Thumbnail Upload */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Cover Image (Optional)</label>
-              <label className={`block border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${thumbnailFile ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100 hover:border-gray-400'}`}>
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={e => setThumbnailFile(e.target.files?.[0] || null)}
-                  className="hidden"
-                />
-                <div className="flex flex-col items-center justify-center gap-3">
-                  <div className={`p-3 rounded-full ${thumbnailFile ? 'bg-blue-100 text-blue-600' : 'bg-white text-gray-400 shadow-sm'}`}>
-                    <ImageIcon size={24} />
-                  </div>
-                  {thumbnailFile ? (
-                    <div>
-                      <p className="text-sm font-bold text-gray-800">{thumbnailFile.name}</p>
-                      <p className="text-xs text-gray-500 mt-1">Cover selected</p>
-                    </div>
-                  ) : (
-                    <div>
-                      <p className="text-sm font-bold text-gray-700">Click to upload Cover</p>
-                      <p className="text-xs text-gray-500 mt-1">JPEG, PNG, WEBP</p>
-                    </div>
-                  )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">{t('content.bookFile')}</label>
+                  <input type="file" required accept=".pdf,.epub" onChange={e => setBookFile(e.target.files?.[0] || null)} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                 </div>
-              </label>
+                <div className="pt-4">
+                  <button type="submit" disabled={uploading} className="w-full bg-[#00502D] text-white py-3 rounded-lg font-bold hover:bg-[#003a20] transition-colors disabled:opacity-70 flex justify-center items-center gap-2">
+                    <Upload size={20} />
+                    {uploading ? t('content.uploading') : t('content.uploadContent')}
+                  </button>
+                </div>
             </div>
           </div>
-
-          <button 
-            type="submit" 
-            disabled={uploading || !file || !title || !author}
-            className="w-full bg-[#00502D] text-white py-4 rounded-xl font-bold text-lg hover:bg-green-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex justify-center items-center gap-2"
-          >
-            {uploading ? (
-              <><span className="animate-pulse">Uploading...</span></>
-            ) : (
-              <><Upload size={20} /> Submit for Review</>
-            )}
-          </button>
         </div>
       </form>
     </div>

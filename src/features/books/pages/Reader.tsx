@@ -3,6 +3,7 @@ import { ArrowLeft, ZoomIn, ZoomOut, Maximize, Minimize, FileText } from "lucide
 import { useState, useEffect, useRef, useCallback } from "react";
 import { bookApi } from "../../../lib/api";
 import { Document, Page, pdfjs } from 'react-pdf';
+import { useTranslation } from 'react-i18next';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -36,9 +37,10 @@ function LazyPage({ pageNumber, scale, onVisible }: { pageNumber: number, scale:
 }
 
 export function Reader() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
-  const [bookTitle, setBookTitle] = useState("Loading...");
+  const [bookTitle, setBookTitle] = useState(t('reader.loading'));
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [numPages, setNumPages] = useState<number>();
@@ -53,7 +55,7 @@ export function Reader() {
         setBookTitle(res.data.data.title);
       }).catch(err => {
         console.error(err);
-        setBookTitle("Unknown Book");
+        setBookTitle(t('reader.unknownBook'));
       });
       const loadPdf = async () => {
         try {
@@ -62,7 +64,7 @@ export function Reader() {
           setPdfUrl(url);
         } catch (err) {
           console.error(err);
-          setError("Failed to load document");
+          setError(t('reader.failedToLoad'));
         }
       };
       loadPdf();
@@ -110,7 +112,7 @@ export function Reader() {
     <div ref={containerRef} className="h-screen flex flex-col bg-gray-900 text-gray-300 overflow-hidden">
       <div className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-700 rounded-lg transition-colors" title="Back">
+          <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-700 rounded-lg transition-colors" title={t('reader.back')}>
             <ArrowLeft size={20} className="text-gray-300" />
           </button>
           <div className="h-6 w-px bg-gray-600"></div>
@@ -122,9 +124,9 @@ export function Reader() {
               <span>{pageNumber} / {numPages}</span>
             </div>
           )}
-          <button onClick={zoomOut} className="p-2 hover:bg-gray-700 rounded-lg" title="Zoom Out"><ZoomOut size={20} /></button>
-          <button onClick={zoomIn} className="p-2 hover:bg-gray-700 rounded-lg" title="Zoom In"><ZoomIn size={20} /></button>
-          <button onClick={toggleFullscreen} className="p-2 hover:bg-gray-700 rounded-lg" title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}>
+          <button onClick={zoomOut} className="p-2 hover:bg-gray-700 rounded-lg" title={t('reader.zoomOut')}><ZoomOut size={20} /></button>
+          <button onClick={zoomIn} className="p-2 hover:bg-gray-700 rounded-lg" title={t('reader.zoomIn')}><ZoomIn size={20} /></button>
+          <button onClick={toggleFullscreen} className="p-2 hover:bg-gray-700 rounded-lg" title={isFullscreen ? t('reader.exitFullscreen') : t('reader.fullscreen')}>
             {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
           </button>
         </div>
@@ -135,7 +137,7 @@ export function Reader() {
             <p className="text-red-400">{error}</p>
           </div>
         ) : pdfUrl ? (
-          <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess} className="w-full flex flex-col items-center" loading={<div className="text-white">Loading PDF...</div>}>
+          <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess} className="w-full flex flex-col items-center" loading={<div className="text-white">{t('reader.loadingPdf')}</div>}>
             {numPages && Array.from(new Array(numPages), (el, index) => (
               <LazyPage 
                 key={`page_${index + 1}`} 
@@ -147,7 +149,7 @@ export function Reader() {
           </Document>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <p>Loading document...</p>
+            <p>{t('reader.loadingDocument')}</p>
           </div>
         )}
       </div>

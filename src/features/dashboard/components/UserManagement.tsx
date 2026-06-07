@@ -3,8 +3,10 @@ import { Check, X, UserCog, Search, Users, UserPlus, Clock } from "lucide-react"
 import api, { adminApi } from "../../../lib/api";
 import { toast } from "sonner";
 import { useAuth } from "../../../context/AuthContext";
+import { useTranslation } from "react-i18next";
 
 export function UserManagement() {
+  const { t } = useTranslation();
   const { hasPermission } = useAuth();
   const [activeTab, setActiveTab] = useState<'users' | 'approvals'>(hasPermission('ASSIGN_ROLE') ? 'users' : 'approvals');
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
@@ -53,10 +55,10 @@ export function UserManagement() {
       await api.post(`/admin/users/${id}/approve`);
       setPendingUsers(prev => prev.filter(u => u.id !== id));
       setSelectedPending(prev => prev.filter(selectedId => selectedId !== id));
-      toast.success("User approved");
+      toast.success(t('userManagement.userApproved'));
     } catch (err) {
       console.error(err);
-      toast.error("Failed to approve user");
+      toast.error(t('userManagement.failedApprove'));
     }
   };
 
@@ -66,10 +68,10 @@ export function UserManagement() {
       await adminApi.approveBulkUsers(selectedPending);
       setPendingUsers(prev => prev.filter(u => !selectedPending.includes(u.id)));
       setSelectedPending([]);
-      toast.success("Users approved");
+      toast.success(t('userManagement.usersApproved'));
     } catch (err) {
       console.error(err);
-      toast.error("Failed to approve users");
+      toast.error(t('userManagement.failedApproveUsers'));
     }
   };
 
@@ -89,11 +91,11 @@ export function UserManagement() {
     if (!assignRoleUserId) return;
     try {
       await api.put(`/admin/users/${assignRoleUserId}/roles`, selectedRolesForUser);
-      toast.success("Roles updated successfully");
+      toast.success(t('userManagement.rolesUpdated'));
       setAssignRoleUserId(null);
       fetchData();
     } catch (e) {
-      toast.error("Failed to update roles");
+      toast.error(t('userManagement.failedRoles'));
     }
   };
 
@@ -106,12 +108,12 @@ export function UserManagement() {
     if (!banUserId || !actionReason.trim()) return;
     try {
       await adminApi.banUser(banUserId, actionReason);
-      toast.success("User banned successfully");
+      toast.success(t('userManagement.userBanned'));
       setBanUserId(null);
       setActionReason("");
       fetchData();
     } catch (e) {
-      toast.error("Failed to ban user");
+      toast.error(t('userManagement.failedBan'));
     }
   };
 
@@ -119,12 +121,12 @@ export function UserManagement() {
     if (!timeoutUserId || !actionReason.trim()) return;
     try {
       await adminApi.timeoutUser(timeoutUserId, timeoutMinutes, actionReason);
-      toast.success("User timed out successfully");
+      toast.success(t('userManagement.userTimedOut'));
       setTimeoutUserId(null);
       setActionReason("");
       fetchData();
     } catch (e) {
-      toast.error("Failed to timeout user");
+      toast.error(t('userManagement.failedTimeout'));
     }
   };
 
@@ -145,7 +147,7 @@ export function UserManagement() {
             className={`pb-3 px-2 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'users' ? 'border-[#00502D] text-[#00502D]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             onClick={() => setActiveTab('users')}
           >
-            <Users size={18} /> All Users
+            <Users size={18} /> {t('userManagement.allUsers')}
           </button>
         )}
         {hasPermission('APPROVE_USER') && (
@@ -153,7 +155,7 @@ export function UserManagement() {
             className={`pb-3 px-2 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${activeTab === 'approvals' ? 'border-[#00502D] text-[#00502D]' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
             onClick={() => setActiveTab('approvals')}
           >
-            <UserPlus size={18} /> Pending Approvals
+            <UserPlus size={18} /> {t('userManagement.pendingApprovals')}
             {pendingUsers.length > 0 && activeTab !== 'approvals' && (
               <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{pendingUsers.length}</span>
             )}
@@ -164,10 +166,10 @@ export function UserManagement() {
       {activeTab === 'approvals' && hasPermission('APPROVE_USER') && (
         <div className="mb-12 animate-in fade-in">
           <div className="flex justify-between items-end mb-4">
-            <h2 className="text-lg font-bold text-gray-800">Review New Registrations</h2>
+            <h2 className="text-lg font-bold text-gray-800">{t('userManagement.reviewRegistrations')}</h2>
             {selectedPending.length > 0 && (
               <button onClick={batchApprove} className="bg-green-600 text-white px-3 py-1.5 rounded text-sm font-bold flex items-center gap-1 hover:bg-green-700 transition-colors shadow-sm">
-                <Check size={16} /> Batch Approve ({selectedPending.length})
+                <Check size={16} /> {t('userManagement.batchApprove')} ({selectedPending.length})
               </button>
             )}
           </div>
@@ -183,10 +185,10 @@ export function UserManagement() {
                       checked={selectedPending.length === pendingUsers.length && pendingUsers.length > 0} 
                     />
                   </th>
-                  <th className="px-4 py-3">User Info</th>
-                  <th className="px-4 py-3">Email</th>
-                  <th className="px-4 py-3">Registration Date</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3">{t('userManagement.userInfo')}</th>
+                  <th className="px-4 py-3">{t('userManagement.email')}</th>
+                  <th className="px-4 py-3">{t('userManagement.registrationDate')}</th>
+                  <th className="px-4 py-3 text-right">{t('userManagement.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -205,23 +207,23 @@ export function UserManagement() {
                       <div className="text-xs text-gray-500 font-medium">@{u.username}</div>
                     </td>
                     <td className="px-4 py-3 text-gray-600">{u.email || 'N/A'}</td>
-                    <td className="px-4 py-3 text-gray-500">{new Date(u.createdAt).toLocaleString()}</td>
+                    <td className="px-4 py-3 text-gray-500">{u.createdAt ? new Date(u.createdAt).toLocaleString() : 'N/A'}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => approveUser(u.id)} className="p-1.5 text-green-600 hover:bg-green-100 rounded transition-colors" title="Approve"><Check size={18} /></button>
-                        <button className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors" title="Decline"><X size={18} /></button>
+                        <button onClick={() => approveUser(u.id)} className="p-1.5 text-green-600 hover:bg-green-100 rounded transition-colors" title={t('userManagement.approve')}><Check size={18} /></button>
+                        <button className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors" title={t('userManagement.decline')}><X size={18} /></button>
                       </div>
                     </td>
                   </tr>
                 ))}
                 {pendingUsers.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center text-gray-500">No pending users awaiting approval.</td>
+                    <td colSpan={5} className="px-4 py-12 text-center text-gray-500">{t('userManagement.noPending')}</td>
                   </tr>
                 )}
                 {loading && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">Loading...</td>
+                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">{t('userManagement.loading')}</td>
                   </tr>
                 )}
               </tbody>
@@ -233,12 +235,12 @@ export function UserManagement() {
       {activeTab === 'users' && hasPermission('ASSIGN_ROLE') && (
         <div className="animate-in fade-in">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 gap-4">
-            <h2 className="text-lg font-bold text-gray-800">User Directory</h2>
+            <h2 className="text-lg font-bold text-gray-800">{t('userManagement.allUsers')}</h2>
             <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-72">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               <input
                 type="text"
-                placeholder="Search by name or username..."
+                placeholder={t('userManagement.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg py-2 pl-9 pr-4 text-sm focus:outline-none focus:border-[#00502D] focus:ring-1 focus:ring-[#00502D]"
@@ -249,11 +251,11 @@ export function UserManagement() {
             <table className="w-full text-sm text-left bg-white">
               <thead className="bg-gray-50 text-gray-600 uppercase text-xs border-b border-gray-200">
                 <tr>
-                  <th className="px-4 py-3">User</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Roles</th>
-                  <th className="px-4 py-3">Joined</th>
-                  <th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3">{t('userManagement.user')}</th>
+                  <th className="px-4 py-3">{t('userManagement.status')}</th>
+                  <th className="px-4 py-3">{t('userManagement.roles')}</th>
+                  <th className="px-4 py-3">{t('userManagement.joined')}</th>
+                  <th className="px-4 py-3 text-right">{t('userManagement.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -272,21 +274,21 @@ export function UserManagement() {
                       <div className="flex flex-wrap gap-1">
                         {u.roles?.length ? u.roles.map((r: string) => (
                           <span key={r} className="bg-gray-100 border border-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs font-medium">{r}</span>
-                        )) : <span className="text-gray-400 italic text-xs">No roles</span>}
+                        )) : <span className="text-gray-400 italic text-xs">{t('userManagement.noRoles')}</span>}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-gray-500">{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex justify-end gap-2">
-                        <button onClick={() => openAssignRoles(u)} className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors" title="Manage Roles">
+                        <button onClick={() => openAssignRoles(u)} className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors" title={t('userManagement.manageRoles')}>
                           <UserCog size={18} />
                         </button>
                         {hasPermission('BAN_USER') && (
                           <>
-                            <button onClick={() => setBanUserId(u.id)} className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors" title="Ban User">
+                            <button onClick={() => setBanUserId(u.id)} className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors" title={t('userManagement.banUser')}>
                               <X size={18} />
                             </button>
-                            <button onClick={() => setTimeoutUserId(u.id)} className="p-1.5 text-orange-600 hover:bg-orange-100 rounded transition-colors" title="Timeout User">
+                            <button onClick={() => setTimeoutUserId(u.id)} className="p-1.5 text-orange-600 hover:bg-orange-100 rounded transition-colors" title={t('userManagement.timeoutUser')}>
                               <Clock size={18} />
                             </button>
                           </>
@@ -297,12 +299,12 @@ export function UserManagement() {
                 ))}
                 {allUsers.length === 0 && !loading && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center text-gray-500">No users found.</td>
+                    <td colSpan={5} className="px-4 py-12 text-center text-gray-500">{t('userManagement.noUsers')}</td>
                   </tr>
                 )}
                 {loading && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">Loading...</td>
+                    <td colSpan={5} className="px-4 py-8 text-center text-gray-400">{t('userManagement.loading')}</td>
                   </tr>
                 )}
               </tbody>
@@ -314,8 +316,8 @@ export function UserManagement() {
       {assignRoleUserId && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-            <h3 className="text-xl font-bold mb-1 text-gray-900">Manage Roles</h3>
-            <p className="text-sm text-gray-500 mb-6">Select the roles to assign to this user.</p>
+            <h3 className="text-xl font-bold mb-1 text-gray-900">{t('userManagement.manageRoles')}</h3>
+            <p className="text-sm text-gray-500 mb-6">{t('userManagement.selectRolesMsg')}</p>
             <div className="space-y-2 mb-6 max-h-60 overflow-y-auto border border-gray-200 p-3 rounded-lg bg-gray-50/50">
               {allRoles.map(role => (
                 <label key={role.name} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-white rounded border border-transparent hover:border-gray-200 transition-colors">
@@ -336,8 +338,8 @@ export function UserManagement() {
               ))}
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setAssignRoleUserId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
-              <button onClick={handleAssignRolesSubmit} className="px-4 py-2 bg-[#00502D] text-white rounded-lg font-medium hover:bg-[#003a20] transition-colors shadow-sm">Save Roles</button>
+              <button onClick={() => setAssignRoleUserId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">{t('userManagement.cancel')}</button>
+              <button onClick={handleAssignRolesSubmit} className="px-4 py-2 bg-[#00502D] text-white rounded-lg font-medium hover:bg-[#003a20] transition-colors shadow-sm">{t('userManagement.saveRoles')}</button>
             </div>
           </div>
         </div>
@@ -346,21 +348,21 @@ export function UserManagement() {
       {banUserId && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-            <h3 className="text-xl font-bold mb-4 text-red-600">Ban User</h3>
+            <h3 className="text-xl font-bold mb-4 text-red-600">{t('userManagement.banUser')}</h3>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Reason for Ban</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.reasonForBan')}</label>
               <textarea
                 value={actionReason}
                 onChange={(e) => setActionReason(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-[#00502D] focus:border-[#00502D]"
                 rows={3}
-                placeholder="Provide a reason for the ban..."
+                placeholder={t('userManagement.provideBanReason')}
                 required
               />
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setBanUserId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
-              <button onClick={handleBanUser} disabled={!actionReason.trim()} className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50">Ban User</button>
+              <button onClick={() => setBanUserId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">{t('userManagement.cancel')}</button>
+              <button onClick={handleBanUser} disabled={!actionReason.trim()} className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50">{t('userManagement.banUser')}</button>
             </div>
           </div>
         </div>
@@ -369,9 +371,9 @@ export function UserManagement() {
       {timeoutUserId && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-            <h3 className="text-xl font-bold mb-4 text-orange-600">Timeout User</h3>
+            <h3 className="text-xl font-bold mb-4 text-orange-600">{t('userManagement.timeoutUser')}</h3>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Timeout Duration (Minutes)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.timeoutDuration')}</label>
               <input
                 type="number"
                 min="1"
@@ -382,19 +384,19 @@ export function UserManagement() {
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('userManagement.reasonForBan')}</label>
               <textarea
                 value={actionReason}
                 onChange={(e) => setActionReason(e.target.value)}
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-[#00502D] focus:border-[#00502D]"
                 rows={3}
-                placeholder="Provide a reason..."
+                placeholder={t('userManagement.provideReason')}
                 required
               />
             </div>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setTimeoutUserId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
-              <button onClick={handleTimeoutUser} disabled={!actionReason.trim()} className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors disabled:opacity-50">Timeout</button>
+              <button onClick={() => setTimeoutUserId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">{t('userManagement.cancel')}</button>
+              <button onClick={handleTimeoutUser} disabled={!actionReason.trim()} className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors disabled:opacity-50">{t('userManagement.timeout')}</button>
             </div>
           </div>
         </div>

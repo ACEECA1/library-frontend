@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { Shield, Plus, ChevronDown, ChevronUp, AlertCircle, Trash2 } from "lucide-react";
 import api, { adminApi } from "../../../lib/api";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export function RolesManagement() {
+  const { t } = useTranslation();
   const [roles, setRoles] = useState<any[]>([]);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +22,7 @@ export function RolesManagement() {
       setRoles(rolesRes.data.data?.content || []);
       setPermissions(permsRes.data.data || []);
     } catch (err) {
-      toast.error("Failed to load roles data");
+      toast.error(t('rolesManagement.failedUpdate'));
     } finally {
       setLoading(false);
     }
@@ -36,11 +38,11 @@ export function RolesManagement() {
     try {
       const formattedName = newRoleName.trim().toUpperCase().replace(/\s+/g, '_');
       await adminApi.addRole({ name: formattedName, permissions: [] });
-      toast.success("Role created successfully");
+      toast.success(t('rolesManagement.roleCreated'));
       setNewRoleName("");
       fetchData();
     } catch (err) {
-      toast.error("Failed to create role");
+      toast.error(t('rolesManagement.failedCreate'));
     }
   };
 
@@ -55,9 +57,9 @@ export function RolesManagement() {
 
     try {
       await api.put(`/admin/roles/${roleId}`, { permissions: newPerms });
-      toast.success("Permissions updated");
+      toast.success(t('rolesManagement.permissionsUpdated'));
     } catch (err) {
-      toast.error("Failed to update permissions");
+      toast.error(t('rolesManagement.failedUpdate'));
       // Revert on failure
       fetchData();
     }
@@ -65,58 +67,58 @@ export function RolesManagement() {
 
   const handleDeleteRole = async (e: React.MouseEvent, roleId: number) => {
     e.stopPropagation();
-    if (!window.confirm("Are you sure you want to delete this role? This action cannot be undone.")) return;
+    if (!window.confirm(t('rolesManagement.deleteConfirm'))) return;
 
     try {
       await api.delete(`/admin/roles/${roleId}`);
-      toast.success("Role deleted successfully");
+      toast.success(t('rolesManagement.roleDeleted'));
       fetchData();
     } catch (err) {
-      toast.error("Failed to delete role. It may be assigned to users.");
+      toast.error(t('rolesManagement.failedDelete'));
     }
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading roles and permissions...</div>;
+  if (loading) return <div className="p-8 text-center text-gray-500">{t('rolesManagement.loading')}</div>;
 
   return (
     <div className="max-w-5xl mx-auto pb-12">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2 mb-2">
           <Shield className="text-[#00502D]" />
-          Roles & Permissions
+          {t('rolesManagement.rolesAndPermissions')}
         </h2>
-        <p className="text-gray-600">Manage access levels and define what different user roles can do across the platform.</p>
+        <p className="text-gray-600">{t('rolesManagement.description')}</p>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
         <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
           <Plus size={20} className="text-[#00502D]" />
-          Create New Role
+          {t('rolesManagement.createNewRole')}
         </h3>
         <form onSubmit={handleCreateRole} className="flex flex-col sm:flex-row gap-4 items-end">
           <div className="flex-1 w-full">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('rolesManagement.roleName')}</label>
             <input 
               type="text" 
               value={newRoleName}
               onChange={e => setNewRoleName(e.target.value)}
-              placeholder="e.g. MODERATOR, CONTENT_CREATOR" 
+              placeholder={t('rolesManagement.roleNamePlaceholder')} 
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#00502D] focus:ring-1 focus:ring-[#00502D] transition-colors uppercase"
             />
-            <p className="text-xs text-gray-500 mt-1">Role names are automatically converted to UPPERCASE with underscores.</p>
+            <p className="text-xs text-gray-500 mt-1">{t('rolesManagement.roleNameHint')}</p>
           </div>
           <button 
             type="submit" 
             disabled={!newRoleName.trim()}
             className="w-full sm:w-auto bg-[#00502D] text-white px-6 py-2.5 rounded-lg font-medium hover:bg-[#003a20] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
-            Create Role
+            {t('rolesManagement.createRole')}
           </button>
         </form>
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-800 mb-2">Existing Roles</h3>
+        <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('rolesManagement.existingRoles')}</h3>
         {roles.map(role => {
           const isExpanded = expandedRoleId === role.id;
           const isAdmin = role.name === 'ADMIN' || role.name === 'USER'; // Prevent deleting fundamental roles
@@ -133,7 +135,7 @@ export function RolesManagement() {
                   </div>
                   <div>
                     <h4 className="font-bold text-gray-900 text-lg">{role.name}</h4>
-                    <p className="text-sm text-gray-500">{role.permissions?.length || 0} permissions assigned</p>
+                    <p className="text-sm text-gray-500">{role.permissions?.length || 0} {t('rolesManagement.permissionsAssigned')}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -158,8 +160,8 @@ export function RolesManagement() {
                     <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3 text-amber-800">
                       <AlertCircle className="shrink-0 mt-0.5" size={18} />
                       <div className="text-sm">
-                        <p className="font-semibold mb-1">System Role</p>
-                        <p>This is a fundamental system role. It cannot be deleted. The ADMIN role permissions also cannot be modified.</p>
+                        <p className="font-semibold mb-1">{t('rolesManagement.systemRole')}</p>
+                        <p>{t('rolesManagement.systemRoleDesc')}</p>
                       </div>
                     </div>
                   )}

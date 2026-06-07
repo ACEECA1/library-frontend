@@ -4,8 +4,10 @@ import { commentApi } from "../../../lib/api";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ReportModal } from "../../../components/ReportModal";
+import { useTranslation } from "react-i18next";
 
 export function CommentList({ bookId }: { bookId: string | number }) {
+  const { t } = useTranslation();
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
@@ -32,10 +34,10 @@ export function CommentList({ bookId }: { bookId: string | number }) {
     try {
       await commentApi.addComment(bookId, newComment);
       setNewComment("");
-      toast.success("Comment posted!");
+      toast.success(t('bookDetails.commentPosted'));
       fetchComments();
     } catch (err) {
-      toast.error("Failed to post comment");
+      toast.error(t('bookDetails.failedPost'));
     }
   };
   const handleUpvote = async (commentId: number) => {
@@ -58,21 +60,21 @@ export function CommentList({ bookId }: { bookId: string | number }) {
     <div className="space-y-4">
       <div className="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-200">
         <textarea 
-          placeholder="Join the discussion..."
+          placeholder={t('bookDetails.joinDiscussion')}
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#00502D] min-h-[80px] resize-y mb-3"
         ></textarea>
         <div className="flex justify-end">
           <button onClick={handlePostComment} className="bg-[#00502D] text-white px-5 py-1.5 text-sm rounded-lg font-medium hover:bg-green-800">
-            Post Comment
+            {t('bookDetails.postComment')}
           </button>
         </div>
       </div>
       {loading ? (
-        <div className="text-gray-500 text-sm">Loading comments...</div>
+        <div className="text-gray-500 text-sm">{t('bookDetails.loadingComments')}</div>
       ) : comments.length === 0 ? (
-        <div className="text-gray-500 text-sm italic">No comments yet. Start the discussion!</div>
+        <div className="text-gray-500 text-sm italic">{t('bookDetails.noComments')}</div>
       ) : (
         comments.map(comment => (
           <CommentItem 

@@ -8,21 +8,24 @@ import { CategoryManagement } from "../components/CategoryManagement";
 import { ContentManagement } from "../components/ContentManagement";
 import { ModerationQueue } from "../components/ModerationQueue";
 import { AuditLogs } from "../components/AuditLogs";
+import { useTranslation } from "react-i18next";
+
 export function AdminDashboard() {
+  const { t } = useTranslation();
   const { hasPermission } = useAuth();
   const hasUsers = hasPermission('APPROVE_USER');
   const hasRoles = hasPermission('MANAGE_ROLE');
   const hasContent = hasPermission('UPLOAD_BOOK');
   const hasCategories = hasPermission('MANAGE_METADATA');
-  const hasModeration = hasPermission('MODERATE_COMMENT');
+  const hasModeration = hasPermission('MODERATE_COMMENT') || hasPermission('APPROVE_BOOK');
   const hasAudit = hasPermission('VIEW_AUDIT_LOG');
   const availableTabs = [
-    { id: 'users', label: 'Users & Approvals', icon: <Users size={18} />, show: hasUsers },
-    { id: 'roles', label: 'Roles & Permissions', icon: <ShieldCheck size={18} />, show: hasRoles },
-    { id: 'content', label: 'Content Management', icon: <BookOpen size={18} />, show: hasContent },
-    { id: 'categories', label: 'Categories', icon: <Tag size={18} />, show: hasCategories },
-    { id: 'moderation', label: 'Moderation', icon: <ShieldAlert size={18} />, show: hasModeration },
-    { id: 'audit', label: 'Audit Logs', icon: <Activity size={18} />, show: hasAudit },
+    { id: 'users', label: t('adminDashboard.tabs.users'), icon: <Users size={18} />, show: hasUsers },
+    { id: 'roles', label: t('adminDashboard.tabs.roles'), icon: <ShieldCheck size={18} />, show: hasRoles },
+    { id: 'content', label: t('adminDashboard.tabs.content'), icon: <BookOpen size={18} />, show: hasContent },
+    { id: 'categories', label: t('adminDashboard.tabs.categories'), icon: <Tag size={18} />, show: hasCategories },
+    { id: 'moderation', label: t('adminDashboard.tabs.moderation'), icon: <ShieldAlert size={18} />, show: hasModeration },
+    { id: 'audit', label: t('adminDashboard.tabs.audit'), icon: <Activity size={18} />, show: hasAudit },
   ].filter(t => t.show);
   const initialTab = availableTabs.length > 0 ? availableTabs[0].id : '';
   const [activeTab, setActiveTab] = useState(initialTab);
@@ -30,7 +33,7 @@ export function AdminDashboard() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="bg-red-50 text-red-700 p-6 rounded-lg font-bold border border-red-200">
-          Access Denied. You do not have permission to view the dashboard.
+          {t('adminDashboard.accessDenied')}
         </div>
       </div>
     );
@@ -38,11 +41,11 @@ export function AdminDashboard() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-        <p className="text-gray-500">Manage platform resources and users.</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('adminDashboard.title')}</h1>
+        <p className="text-gray-500">{t('adminDashboard.description')}</p>
       </div>
       {availableTabs.length > 1 && (
-        <div className="flex gap-2 overflow-x-auto border-b border-gray-200 mb-6">
+        <div className="flex flex-wrap gap-2 border-b border-gray-200 mb-6">
           {availableTabs.map(tab => (
             <TabButton 
               key={tab.id}

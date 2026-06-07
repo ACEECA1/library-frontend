@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Filter, Star, Search, SlidersHorizontal, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { metadataApi, bookApi } from "../../../lib/api";
 import { BookCard } from "../components/BookCard";
 
 export function Browse() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryQ = searchParams.get("q") || "";
   const querySortBy = searchParams.get("sortBy") || "createdAt";
@@ -84,16 +86,16 @@ export function Browse() {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-4">
           <div className="flex items-center justify-between mb-6 border-b pb-4">
             <div className="flex items-center gap-2 font-bold text-lg text-gray-900">
-              <SlidersHorizontal size={20} className="text-[#00502D]" /> Filters
+              <SlidersHorizontal size={20} className="text-[#00502D]" /> {t('browse.filters')}
             </div>
             {(queryCategory || queryTag || querySeries || queryQ || querySortBy !== "createdAt") && (
-              <button onClick={clearFilters} className="text-xs text-[#00502D] font-semibold hover:underline">Clear all</button>
+              <button onClick={clearFilters} className="text-xs text-[#00502D] font-semibold hover:underline">{t('browse.clearAll')}</button>
             )}
           </div>
           <div className="space-y-6">
             
             <div>
-              <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">Categories</h3>
+              <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">{t('browse.categories')}</h3>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                 <label className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-[#00502D] transition-colors text-sm">
                   <input 
@@ -103,7 +105,7 @@ export function Browse() {
                     onChange={() => updateParam("category", "")}
                     className="rounded-full w-4 h-4 text-[#00502D] focus:ring-[#00502D] border-gray-300" 
                   />
-                  All Categories
+                  {t('browse.allCategories')}
                 </label>
                 {categories.map(cat => (
                   <label key={cat.id} className="flex items-center gap-2 text-gray-700 cursor-pointer hover:text-[#00502D] transition-colors text-sm">
@@ -123,13 +125,13 @@ export function Browse() {
             <div className="h-px bg-gray-100"></div>
 
             <div>
-              <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">Tags</h3>
+              <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">{t('browse.tags')}</h3>
               <div className="flex flex-wrap gap-2">
                 <button 
                   onClick={() => updateParam("tag", "")}
                   className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${queryTag === "" ? 'bg-[#00502D] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                 >
-                  All
+                  {t('browse.all')}
                 </button>
                 {tags.map(tag => (
                   <button 
@@ -147,13 +149,13 @@ export function Browse() {
               <>
                 <div className="h-px bg-gray-100"></div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">Series</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wider">{t('browse.series')}</h3>
                   <select 
                     value={querySeries}
                     onChange={(e) => updateParam("series", e.target.value)}
                     className="w-full border border-gray-200 rounded-lg py-2 px-3 text-sm focus:outline-none focus:border-[#00502D] focus:ring-1 focus:ring-[#00502D] bg-white text-gray-700"
                   >
-                    <option value="">Any Series</option>
+                    <option value="">{t('browse.anySeries')}</option>
                     {seriesList.map(s => (
                       <option key={s.id} value={s.name}>{s.name}</option>
                     ))}
@@ -170,14 +172,14 @@ export function Browse() {
             <div className="bg-green-100 p-2 rounded-lg text-[#00502D]">
               <BookOpen size={24} />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Catalog</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('browse.catalog')}</h1>
           </div>
           <div className="flex items-center gap-4 w-full sm:w-auto">
             <form onSubmit={handleSearchSubmit} className="relative flex-1 sm:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
               <input
                 type="text"
-                placeholder="Search books, authors..."
+                placeholder={t('browse.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full border border-gray-200 rounded-lg py-2 pl-9 pr-4 text-sm focus:outline-none focus:border-[#00502D] focus:ring-1 focus:ring-[#00502D] transition-shadow"
@@ -188,9 +190,9 @@ export function Browse() {
               onChange={(e) => updateParam("sortBy", e.target.value)}
               className="border border-gray-200 rounded-lg py-2 px-4 text-sm focus:outline-none focus:border-[#00502D] focus:ring-1 focus:ring-[#00502D] bg-white text-gray-700 cursor-pointer hover:border-gray-300 transition-colors"
             >
-              <option value="createdAt">Newest First</option>
-              <option value="views">Most Viewed</option>
-              <option value="rating">Highest Rated</option>
+              <option value="createdAt">{t('browse.newestFirst')}</option>
+              <option value="views">{t('browse.mostViewed')}</option>
+              <option value="rating">{t('browse.highestRated')}</option>
             </select>
           </div>
         </div>
@@ -198,15 +200,15 @@ export function Browse() {
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-400">
             <div className="w-10 h-10 border-4 border-gray-200 border-t-[#00502D] rounded-full animate-spin mb-4"></div>
-            <p>Loading library...</p>
+            <p>{t('browse.loadingLibrary')}</p>
           </div>
         ) : books.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-white rounded-xl shadow-sm border border-gray-100 text-center px-4">
             <Search size={48} className="text-gray-300 mb-4" />
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No books found</h3>
-            <p className="text-gray-500 max-w-md">We couldn't find any books matching your current filters. Try adjusting your search or clearing some filters.</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('browse.noBooksFound')}</h3>
+            <p className="text-gray-500 max-w-md">{t('browse.noBooksDesc')}</p>
             <button onClick={clearFilters} className="mt-6 px-6 py-2 bg-[#00502D] text-white rounded-lg font-medium hover:bg-[#003a20] transition-colors shadow-sm">
-              Clear Filters
+              {t('browse.clearFilters')}
             </button>
           </div>
         ) : (
@@ -231,7 +233,7 @@ export function Browse() {
                   <ChevronLeft size={18} />
                 </button>
                 <div className="px-4 py-2 text-sm font-medium bg-white border border-gray-200 rounded-lg shadow-sm flex items-center">
-                  Page {queryPage + 1} of {totalPages}
+                  {t('browse.pageOf', { current: queryPage + 1, total: totalPages })}
                 </div>
                 <button 
                   onClick={() => updateParam("page", String(queryPage + 1))}
