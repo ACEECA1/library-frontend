@@ -137,8 +137,8 @@ export function ModerationQueue() {
             </div>
           ))}
         </div>
+        )
       )}
-      
       {subTab === 'reports' && (
         <div className="space-y-4">
           {reports.length === 0 ? (
