@@ -18,7 +18,7 @@ export function BookDetails() {
         setLoading(true);
         const res = await bookApi.getBook(id!);
         setBook(res.data.data);
-        setBookmarked(res.data.data.isBookmarked || false);
+        setBookmarked(res.data.data.bookmarked || false);
       } catch (err) {
         toast.error("Failed to load book details");
       } finally {
@@ -35,12 +35,12 @@ export function BookDetails() {
           await bookmarkApi.deleteBookmark(book.userBookmarkId);
         }
         setBookmarked(false);
-        setBook((prev: any) => ({ ...prev, isBookmarked: false, userBookmarkId: undefined }));
+        setBook((prev: any) => ({ ...prev, bookmarked: false, userBookmarkId: undefined }));
         toast.success("Bookmark removed");
       } else {
         const res = await bookmarkApi.addBookmark(id!);
         setBookmarked(true);
-        setBook((prev: any) => ({ ...prev, isBookmarked: true, userBookmarkId: res.data.data.id }));
+        setBook((prev: any) => ({ ...prev, bookmarked: true, userBookmarkId: res.data.data.id }));
         toast.success("Bookmarked successfully");
       }
     } catch (err) {

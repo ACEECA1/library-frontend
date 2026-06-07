@@ -41,7 +41,7 @@ export interface BookResponseDTO {
   views: number;
   averageRating: number;
   reviewCount: number;
-  isBookmarked: boolean;
+  bookmarked: boolean;
   userBookmarkId?: number;
   uploaderUsername: string;
   createdAt: string;
