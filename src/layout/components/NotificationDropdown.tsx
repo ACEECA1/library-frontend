@@ -11,11 +11,11 @@ export function NotificationDropdown() {
       .then(res => setNotifications(res.data.data || []))
       .catch(err => console.error("Failed to fetch notifications", err));
   }, []);
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
   const markAsRead = async (id: number) => {
     try {
       await api.put(`/notifications/${id}/read`);
-      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
+      setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
     } catch (e) {
       console.error("Failed to mark as read", e);
     }
@@ -23,7 +23,7 @@ export function NotificationDropdown() {
   const markAllAsRead = async () => {
     try {
       await api.put('/notifications/read-all');
-      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
     } catch (e) {
       console.error("Failed to mark all as read", e);
     }
