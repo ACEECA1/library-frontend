@@ -8,7 +8,7 @@ import { Login } from "./features/auth/pages/Login";
 import { Register } from "./features/auth/pages/Register";
 import { MyCollection } from "./features/books/pages/MyCollection";
 import { AdminDashboard } from "./features/dashboard/pages/AdminDashboard";
-
+import { Settings } from "./features/dashboard/Settings";
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -28,6 +28,7 @@ export const router = createBrowserRouter([
       { path: "read/:id", Component: Reader },
       { path: "collection", Component: MyCollection },
       { path: "admin", Component: AdminDashboard },
+      { path: "settings", Component: Settings },
     ],
   },
 ]);

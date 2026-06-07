@@ -1,41 +1,34 @@
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
 import { Filter, Star, Search, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
-import api from "../../../lib/api";
-
+import { metadataApi, bookApi } from "../../../lib/api";
+import { SecureImage } from "@/components/SecureImage";
 export function Browse() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
   const queryQ = searchParams.get("q") || "";
   const querySortBy = searchParams.get("sortBy") || "createdAt";
   const queryCategory = searchParams.get("category") || "";
   const queryPage = parseInt(searchParams.get("page") || "0", 10);
-
   const [search, setSearch] = useState(queryQ);
   const [books, setBooks] = useState<any[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
-
   const [categories, setCategories] = useState<any[]>([]);
-
   useEffect(() => {
-    api.get('/metadata/categories')
+    metadataApi.getCategories()
       .then(res => setCategories(res.data.data || []))
       .catch(err => console.error(err));
   }, []);
-
   useEffect(() => {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const res = await api.get('/books/search', {
-          params: {
-            q: queryQ,
-            category: queryCategory,
-            sortBy: querySortBy,
-            page: queryPage,
-            size: 12
-          }
+        const res = await bookApi.searchBooks({
+          q: queryQ,
+          category: queryCategory,
+          sortBy: querySortBy,
+          page: queryPage,
+          size: 12
         });
         setBooks(res.data.data.content || []);
         setTotalPages(res.data.data.totalPages || 0);
@@ -47,7 +40,6 @@ export function Browse() {
     };
     fetchBooks();
   }, [queryQ, queryCategory, querySortBy, queryPage]);
-
   const updateParam = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);
     if (value) {
@@ -58,21 +50,17 @@ export function Browse() {
     if (key !== 'page') newParams.delete('page');
     setSearchParams(newParams);
   };
-
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateParam("q", search);
   };
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
-      {/* Sidebar Filters */}
       <aside className="w-full md:w-64 shrink-0">
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 sticky top-4">
           <div className="flex items-center gap-2 mb-6 font-bold text-lg border-b pb-4">
             <SlidersHorizontal size={20} /> Filters
           </div>
-
           <div className="space-y-6">
             <div>
               <h3 className="font-semibold text-gray-900 mb-3">Categories</h3>
@@ -104,8 +92,6 @@ export function Browse() {
           </div>
         </div>
       </aside>
-
-      {/* Main Content */}
       <div className="flex-1">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Catalog</h1>
@@ -130,7 +116,6 @@ export function Browse() {
             </select>
           </div>
         </div>
-
         {loading ? (
           <p className="text-gray-500">Loading books...</p>
         ) : books.length === 0 ? (
@@ -141,8 +126,8 @@ export function Browse() {
               {books.map((book) => (
                 <Link to={`/book/${book.id}`} key={book.id} className="group flex flex-col">
                   <div className="relative aspect-[2/3] mb-3 overflow-hidden rounded-lg shadow-sm bg-gray-200">
-                    {book.thumbnailUrl ? (
-                      <img src={book.thumbnailUrl} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    {book.thumbnailPath ? (
+                      <SecureImage src={`/books/${book.id}/thumbnail`} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-green-900/10 to-[#00502D]/20 flex items-center justify-center text-[#00502D] font-medium text-center p-4">
                         {book.title}
@@ -158,8 +143,6 @@ export function Browse() {
                 </Link>
               ))}
             </div>
-            
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-center mt-12 gap-2">
                 <button 

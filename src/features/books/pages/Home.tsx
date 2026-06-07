@@ -1,22 +1,20 @@
 import { Link } from "react-router";
 import { BookOpen, Star, Clock, ChevronRight, Upload, ShieldAlert, Users } from "lucide-react";
 import { useState, useEffect } from "react";
-import api from "../../../lib/api";
-
+import { bookApi, API_URL } from "../../../lib/api";
+import { SecureImage } from "@/components/SecureImage";
 export function Home() {
   const role = localStorage.getItem('userRole') || 'user';
   const userName = localStorage.getItem('userName') || 'User';
-
   const [trending, setTrending] = useState<any[]>([]);
   const [recent, setRecent] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchBooks = async () => {
       try {
         const [recentRes, trendingRes] = await Promise.all([
-          api.get('/books?size=5&sort=createdAt,desc'),
-          api.get('/books/search?sortBy=popular&size=5')
+          bookApi.getBooks({ size: 5, sort: 'createdAt,desc' }),
+          bookApi.searchBooks({ sortBy: 'popular', size: 5 })
         ]);
         setRecent(recentRes.data.data.content || []);
         setTrending(trendingRes.data.data.content || []);
@@ -28,10 +26,8 @@ export function Home() {
     };
     fetchBooks();
   }, []);
-
   return (
     <div className="pb-12">
-      {/* Hero Section */}
       <section className="bg-[#00502D] text-white py-16 px-6 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -68,8 +64,6 @@ export function Home() {
           </div>
         </div>
       </section>
-
-      {/* Categories / Highlights */}
       <section className="max-w-7xl mx-auto px-6 mt-12">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -81,7 +75,6 @@ export function Home() {
         </div>
         {loading ? <p className="text-gray-500">Loading...</p> : <BookGrid items={trending} />}
       </section>
-
       <section className="max-w-7xl mx-auto px-6 mt-16">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -96,7 +89,6 @@ export function Home() {
     </div>
   );
 }
-
 function BookGrid({ items }: { items: any[] }) {
   if (!items || items.length === 0) return <p className="text-gray-500">No books found.</p>;
   return (
@@ -104,8 +96,8 @@ function BookGrid({ items }: { items: any[] }) {
       {items.map((book, i) => (
         <Link to={`/book/${book.id}`} key={i} className="group flex flex-col">
           <div className="relative aspect-[2/3] mb-3 overflow-hidden rounded-lg shadow-sm bg-gray-200">
-            {book.thumbnailUrl ? (
-              <img src={book.thumbnailUrl} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            {book.thumbnailPath ? (
+              <SecureImage src={`/books/${book.id}/thumbnail`} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
             ) : (
               <div className="w-full h-full bg-[#00502D]/10 flex items-center justify-center text-[#00502D] font-medium text-center p-4">
                 {book.title}

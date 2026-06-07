@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Upload } from "lucide-react";
-import api from "../../../lib/api";
-
+import { metadataApi, bookApi } from "../../../lib/api";
 export function ContentManagement() {
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -9,25 +8,21 @@ export function ContentManagement() {
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [seriesId, setSeriesId] = useState("");
-  
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
   const [series, setSeries] = useState<any[]>([]);
-  
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState(false);
-
   useEffect(() => {
     fetchMetadata();
   }, []);
-
   const fetchMetadata = async () => {
     try {
       const [catRes, tagRes, seriesRes] = await Promise.all([
-        api.get('/metadata/categories'),
-        api.get('/metadata/tags'),
-        api.get('/metadata/series')
+        metadataApi.getCategories(),
+        metadataApi.getTags(),
+        metadataApi.getSeries()
       ]);
       setCategories(catRes.data.data || []);
       setTags(tagRes.data.data || []);
@@ -36,27 +31,20 @@ export function ContentManagement() {
       console.error("Failed to load metadata", err);
     }
   };
-
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !title || !author) return;
-
     const formData = new FormData();
     formData.append("title", title);
     formData.append("author", author);
     if (description) formData.append("description", description);
-    
     selectedCategoryIds.forEach(id => formData.append("categoryIds", id));
     selectedTagIds.forEach(id => formData.append("tagIds", id));
     if (seriesId) formData.append("seriesId", seriesId);
-    
     formData.append("pdfFile", file);
-
     setUploading(true);
     try {
-      await api.post('/books', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      await bookApi.uploadBook(formData);
       setSuccess(true);
       setTitle("");
       setAuthor("");
@@ -71,22 +59,18 @@ export function ContentManagement() {
       setUploading(false);
     }
   };
-
   const handleMultiSelect = (e: React.ChangeEvent<HTMLSelectElement>, setter: React.Dispatch<React.SetStateAction<string[]>>) => {
     const options = Array.from(e.target.selectedOptions, option => option.value);
     setter(options);
   };
-
   return (
     <div>
       <h2 className="text-xl font-bold mb-6">Upload New Book</h2>
-
       {success && (
         <div className="mb-4 bg-green-50 text-green-700 p-3 rounded-md border border-green-200">
           Book uploaded successfully!
         </div>
       )}
-
       <form onSubmit={handleUpload} className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
@@ -107,7 +91,6 @@ export function ContentManagement() {
               required 
             />
           </div>
-          
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Categories (Ctrl+Click)</label>
@@ -132,7 +115,6 @@ export function ContentManagement() {
               </select>
             </div>
           </div>
-          
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Series (Optional)</label>
             <select 
@@ -144,7 +126,6 @@ export function ContentManagement() {
               {series.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea 
@@ -154,7 +135,6 @@ export function ContentManagement() {
             />
           </div>
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">PDF File *</label>
           <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center flex flex-col items-center justify-center">
@@ -168,7 +148,6 @@ export function ContentManagement() {
             />
             {file && <p className="mt-2 text-sm font-medium text-[#00502D]">{file.name}</p>}
           </div>
-
           <button 
             type="submit" 
             disabled={uploading || !file || !title || !author}

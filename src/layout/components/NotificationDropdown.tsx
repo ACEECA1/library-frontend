@@ -1,26 +1,33 @@
 import { useState, useRef, useEffect } from "react";
 import { Bell } from "lucide-react";
 import { NotificationItem } from "./NotificationItem";
-
+import api, { notificationApi } from "../../lib/api";
 export function NotificationDropdown() {
   const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState([
-    { id: 1, text: "Your book upload 'Advanced Concrete Design' was approved.", read: false, time: "2m ago" },
-    { id: 2, text: "Engineer Kamel replied to your comment on Structural Analysis.", read: false, time: "1h ago" },
-    { id: 3, text: "System maintenance scheduled for tonight.", read: true, time: "1d ago" },
-  ]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const notifRef = useRef<HTMLDivElement>(null);
-
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const markAsRead = (id: number) => {
-    setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+  useEffect(() => {
+    notificationApi.getNotifications()
+      .then(res => setNotifications(res.data.data || []))
+      .catch(err => console.error("Failed to fetch notifications", err));
+  }, []);
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const markAsRead = async (id: number) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
+    } catch (e) {
+      console.error("Failed to mark as read", e);
+    }
   };
-
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const markAllAsRead = async () => {
+    try {
+      await api.put('/notifications/read-all');
+      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+    } catch (e) {
+      console.error("Failed to mark all as read", e);
+    }
   };
-
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
@@ -30,7 +37,6 @@ export function NotificationDropdown() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-
   return (
     <div className="relative" ref={notifRef}>
       <button 
@@ -42,7 +48,6 @@ export function NotificationDropdown() {
           <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
         )}
       </button>
-      
       {showNotifications && (
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl py-2 z-50 text-gray-800 border border-gray-100">
           <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-lg">

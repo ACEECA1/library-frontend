@@ -8,17 +8,14 @@ import { CategoryManagement } from "../components/CategoryManagement";
 import { ContentManagement } from "../components/ContentManagement";
 import { ModerationQueue } from "../components/ModerationQueue";
 import { AuditLogs } from "../components/AuditLogs";
-
 export function AdminDashboard() {
   const { hasPermission } = useAuth();
-  
   const hasUsers = hasPermission('APPROVE_USER');
   const hasRoles = hasPermission('MANAGE_ROLE');
   const hasContent = hasPermission('UPLOAD_BOOK');
   const hasCategories = hasPermission('MANAGE_METADATA');
   const hasModeration = hasPermission('MODERATE_COMMENT');
   const hasAudit = hasPermission('VIEW_AUDIT_LOG');
-
   const availableTabs = [
     { id: 'users', label: 'Users & Approvals', icon: <Users size={18} />, show: hasUsers },
     { id: 'roles', label: 'Roles & Permissions', icon: <ShieldCheck size={18} />, show: hasRoles },
@@ -27,10 +24,8 @@ export function AdminDashboard() {
     { id: 'moderation', label: 'Moderation', icon: <ShieldAlert size={18} />, show: hasModeration },
     { id: 'audit', label: 'Audit Logs', icon: <Activity size={18} />, show: hasAudit },
   ].filter(t => t.show);
-
   const initialTab = availableTabs.length > 0 ? availableTabs[0].id : '';
   const [activeTab, setActiveTab] = useState(initialTab);
-
   if (availableTabs.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -40,14 +35,12 @@ export function AdminDashboard() {
       </div>
     );
   }
-
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
         <p className="text-gray-500">Manage platform resources and users.</p>
       </div>
-
       {availableTabs.length > 1 && (
         <div className="flex gap-2 overflow-x-auto border-b border-gray-200 mb-6">
           {availableTabs.map(tab => (
@@ -61,7 +54,6 @@ export function AdminDashboard() {
           ))}
         </div>
       )}
-
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
         {activeTab === 'users' && <UserManagement />}
         {activeTab === 'roles' && <RolesManagement />}

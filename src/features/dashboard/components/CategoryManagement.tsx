@@ -1,24 +1,21 @@
 import { useState, useEffect } from "react";
 import { Plus, Trash2, Tag as TagIcon, Folder, Layers } from "lucide-react";
-import api from "../../../lib/api";
+import api, { metadataApi } from "../../../lib/api";
 import { toast } from "sonner";
-
 export function CategoryManagement() {
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
   const [seriesList, setSeriesList] = useState<any[]>([]);
-
   const [newCatName, setNewCatName] = useState("");
   const [newTagName, setNewTagName] = useState("");
   const [newSeriesName, setNewSeriesName] = useState("");
   const [newSeriesDesc, setNewSeriesDesc] = useState("");
-
   const fetchData = async () => {
     try {
       const [catRes, tagRes, serRes] = await Promise.all([
-        api.get('/metadata/categories'),
-        api.get('/metadata/tags'),
-        api.get('/metadata/series')
+        metadataApi.getCategories(),
+        metadataApi.getTags(),
+        metadataApi.getSeries()
       ]);
       setCategories(catRes.data.data || []);
       setTags(tagRes.data.data || []);
@@ -27,16 +24,14 @@ export function CategoryManagement() {
       toast.error("Failed to fetch metadata");
     }
   };
-
   useEffect(() => {
     fetchData();
   }, []);
-
   const handleCreateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCatName.trim()) return;
     try {
-      await api.post('/metadata/categories', { name: newCatName });
+      await metadataApi.addCategory({ name: newCatName });
       toast.success("Category created");
       setNewCatName("");
       fetchData();
@@ -44,7 +39,6 @@ export function CategoryManagement() {
       toast.error("Failed to create category");
     }
   };
-
   const handleDeleteCategory = async (id: number) => {
     try {
       await api.delete(`/metadata/categories/${id}`);
@@ -54,12 +48,11 @@ export function CategoryManagement() {
       toast.error("Failed to delete category");
     }
   };
-
   const handleCreateTag = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTagName.trim()) return;
     try {
-      await api.post('/metadata/tags', { name: newTagName });
+      await metadataApi.addTag({ name: newTagName });
       toast.success("Tag created");
       setNewTagName("");
       fetchData();
@@ -67,7 +60,6 @@ export function CategoryManagement() {
       toast.error("Failed to create tag");
     }
   };
-
   const handleDeleteTag = async (id: number) => {
     try {
       await api.delete(`/metadata/tags/${id}`);
@@ -77,12 +69,11 @@ export function CategoryManagement() {
       toast.error("Failed to delete tag");
     }
   };
-
   const handleCreateSeries = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSeriesName.trim()) return;
     try {
-      await api.post('/metadata/series', { name: newSeriesName, description: newSeriesDesc });
+      await metadataApi.addSeries({ name: newSeriesName, description: newSeriesDesc });
       toast.success("Series created");
       setNewSeriesName("");
       setNewSeriesDesc("");
@@ -91,12 +82,9 @@ export function CategoryManagement() {
       toast.error("Failed to create series");
     }
   };
-
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        
-        {/* Categories section */}
         <div>
           <div className="flex items-center gap-2 mb-4 text-lg font-bold text-gray-800 border-b pb-2">
             <Folder size={20} className="text-yellow-500" /> Categories
@@ -124,8 +112,6 @@ export function CategoryManagement() {
             ))}
           </div>
         </div>
-
-        {/* Tags section */}
         <div>
           <div className="flex items-center gap-2 mb-4 text-lg font-bold text-gray-800 border-b pb-2">
             <TagIcon size={20} className="text-blue-500" /> Tags
@@ -154,8 +140,6 @@ export function CategoryManagement() {
           </div>
         </div>
       </div>
-
-      {/* Series section */}
       <div>
         <div className="flex items-center gap-2 mb-4 text-lg font-bold text-gray-800 border-b pb-2">
           <Layers size={20} className="text-purple-500" /> Series

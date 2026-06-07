@@ -1,5 +1,4 @@
 import { Star, Flag } from "lucide-react";
-
 export function ReviewItem({ name, date, rating, text, badge }: any) {
   return (
     <div className="flex gap-4 p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">

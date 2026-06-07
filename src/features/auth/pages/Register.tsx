@@ -1,9 +1,8 @@
 import { Link, useNavigate } from "react-router";
 import { User, Lock, Calendar } from "lucide-react";
 import { useState } from "react";
-import api from "../../../lib/api";
+import { authApi } from "../../../lib/api";
 import logoImg from "../../../imports/mq1jioql-ANP.png";
-
 export function Register() {
   const navigate = useNavigate();
   const [firstName, setFirstName] = useState("");
@@ -15,19 +14,16 @@ export function Register() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
-
     setLoading(true);
     try {
-      await api.post('/auth/register', {
+      await authApi.register({
         firstName,
         lastName,
         dateOfBirth,
@@ -42,7 +38,6 @@ export function Register() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col justify-center items-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
@@ -53,7 +48,6 @@ export function Register() {
             <p className="text-green-100 text-xs mt-1 text-center max-w-[250px]">New accounts must be approved by an administrator before access is granted.</p>
           </div>
         </div>
-        
         <div className="p-6 sm:p-8">
           {error && (
             <div className="mb-4 bg-red-50 text-red-600 text-sm p-3 rounded-md border border-red-200">
@@ -65,7 +59,6 @@ export function Register() {
               Registration successful! Please wait for admin approval. Redirecting...
             </div>
           )}
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -82,7 +75,6 @@ export function Register() {
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
                 <div className="relative">
@@ -98,7 +90,6 @@ export function Register() {
                 </div>
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
               <div className="relative">
@@ -112,7 +103,6 @@ export function Register() {
                 />
               </div>
             </div>
-            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
               <div className="relative">
@@ -127,7 +117,6 @@ export function Register() {
                 />
               </div>
             </div>
-            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
               <div className="relative">
@@ -142,7 +131,6 @@ export function Register() {
                 />
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
               <div className="relative">
@@ -157,12 +145,10 @@ export function Register() {
                 />
               </div>
             </div>
-
             <button disabled={loading || success} type="submit" className="w-full bg-[#00502D] text-white py-3 rounded-lg font-bold hover:bg-green-800 transition-colors shadow-md mt-4 disabled:opacity-70">
               {loading ? "Submitting..." : "Submit Request"}
             </button>
           </form>
-
           <div className="mt-6 text-center text-sm text-gray-600">
             Already approved? <Link to="/login" className="text-[#00502D] font-bold hover:underline">Sign In</Link>
           </div>

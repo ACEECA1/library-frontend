@@ -3,21 +3,20 @@ import { Star, BookOpen, Bookmark, MessageSquare, Flag, ArrowLeft, Loader2 } fro
 import { useState, useEffect } from "react";
 import { ReviewList } from "../components/ReviewList";
 import { CommentList } from "../components/CommentList";
-import api from "../../../lib/api";
+import { bookApi } from "../../../lib/api";
 import { toast } from "sonner";
-
+import { SecureImage } from "@/components/SecureImage";
 export function BookDetails() {
   const { id } = useParams();
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
   const [activeTab, setActiveTab] = useState<'reviews' | 'discussion'>('reviews');
-
   useEffect(() => {
     const fetchBook = async () => {
       try {
         setLoading(true);
-        const res = await api.get(`/books/${id}`);
+        const res = await bookApi.getBook(id!);
         setBook(res.data.data);
       } catch (err) {
         toast.error("Failed to load book details");
@@ -27,7 +26,6 @@ export function BookDetails() {
     };
     if (id) fetchBook();
   }, [id]);
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -35,7 +33,6 @@ export function BookDetails() {
       </div>
     );
   }
-
   if (!book) {
     return (
       <div className="max-w-5xl mx-auto px-4 py-8 text-center text-gray-500">
@@ -43,27 +40,22 @@ export function BookDetails() {
       </div>
     );
   }
-
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <Link to="/browse" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-[#00502D] mb-6">
         <ArrowLeft size={16} /> Back to Catalog
       </Link>
-
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="flex flex-col md:flex-row">
-          {/* Cover */}
           <div className="w-full md:w-1/3 bg-gray-50 p-8 flex items-center justify-center border-r border-gray-100">
-            {book.thumbnailUrl ? (
-              <img src={book.thumbnailUrl} alt="cover" className="max-w-full rounded-lg shadow-xl" />
+            {book.thumbnailPath ? (
+              <SecureImage src={`/books/${book.id}/thumbnail`} alt="cover" className="max-w-full rounded-lg shadow-xl" />
             ) : (
               <div className="aspect-[2/3] w-full max-w-[240px] bg-gradient-to-br from-[#00502D] to-green-900 rounded-lg shadow-xl flex items-center justify-center text-white text-center p-4">
                 <span className="font-bold text-xl">{book.title}</span>
               </div>
             )}
           </div>
-
-          {/* Details */}
           <div className="w-full md:w-2/3 p-8 flex flex-col">
             <div className="flex items-start justify-between mb-2">
               <div>
@@ -87,11 +79,9 @@ export function BookDetails() {
                 <span className="text-xs text-gray-500">{book.reviewsCount || 0} reviews</span>
               </div>
             </div>
-
             <p className="text-gray-600 mt-6 leading-relaxed flex-1">
               {book.description || 'No description available for this book.'}
             </p>
-
             <div className="mt-8 flex flex-wrap gap-4">
               <Link to={`/read/${id}`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-[#00502D] text-white px-8 py-3 rounded-lg font-bold hover:bg-green-800 transition-colors shadow-sm">
                 <BookOpen size={20} /> Read Now
@@ -111,8 +101,6 @@ export function BookDetails() {
           </div>
         </div>
       </div>
-
-      {/* Reviews & Discussion Section */}
       <div className="mt-12 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
         <div className="flex gap-6 border-b border-gray-200 mb-8">
           <button 
@@ -130,57 +118,16 @@ export function BookDetails() {
             Discussion
           </button>
         </div>
-
         {activeTab === 'reviews' ? (
           <div>
-            {/* Add Review */}
-            <div className="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-200">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <button key={star} className="text-gray-300 hover:text-yellow-400 focus:outline-none">
-                      <Star size={20} />
-                    </button>
-                  ))}
-                </div>
-                <span className="text-sm text-gray-500 ml-2">Rate this book</span>
-              </div>
-              <textarea 
-                placeholder="Write your review..."
-                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#00502D] min-h-[80px] resize-y"
-              ></textarea>
-              <div className="mt-3 flex justify-end">
-                <button className="bg-[#00502D] text-white px-5 py-1.5 text-sm rounded-lg font-medium hover:bg-green-800">
-                  Post Review
-                </button>
-              </div>
-            </div>
-
-            {/* Review List */}
-            <ReviewList bookId={id} />
+            <ReviewList bookId={id!} />
           </div>
         ) : (
           <div>
-            {/* Add Comment */}
-            <div className="bg-gray-50 p-4 rounded-xl mb-6 border border-gray-200">
-              <textarea 
-                placeholder="Join the discussion..."
-                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-[#00502D] min-h-[80px] resize-y mb-3"
-              ></textarea>
-              <div className="flex justify-end">
-                <button className="bg-[#00502D] text-white px-5 py-1.5 text-sm rounded-lg font-medium hover:bg-green-800">
-                  Post Comment
-                </button>
-              </div>
-            </div>
-
-            {/* Comment List */}
-            <CommentList bookId={id} />
+            <CommentList bookId={id!} />
           </div>
         )}
       </div>
     </div>
   );
 }
-
-

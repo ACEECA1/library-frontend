@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
-import api from "../../../lib/api";
+import { adminApi } from "../../../lib/api";
 import { format } from "date-fns";
-
 export function AuditLogs() {
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const res = await api.get('/admin/audit-logs?size=50&sort=createdAt,desc');
-        setLogs(res.data.content || []);
+        const res = await adminApi.getAuditLogs({ size: 50, sort: 'createdAt,desc' });
+        setLogs(res.data.data.content || []);
       } catch (err) {
         console.error("Failed to fetch audit logs", err);
       } finally {
@@ -19,13 +17,10 @@ export function AuditLogs() {
     };
     fetchLogs();
   }, []);
-
   if (loading) return <div className="text-gray-500">Loading audit logs...</div>;
-
   return (
     <div>
       <h2 className="text-xl font-bold mb-6 text-gray-800 border-b pb-2">System Audit Logs</h2>
-      
       <div className="overflow-x-auto border border-gray-200 rounded-lg">
         <table className="w-full text-sm text-left">
           <thead className="bg-gray-50 text-gray-600 uppercase text-xs border-b border-gray-200">
