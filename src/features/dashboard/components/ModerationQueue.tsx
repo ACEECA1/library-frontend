@@ -7,9 +7,10 @@ import { formatDistanceToNow } from "date-fns";
 
 export function ModerationQueue() {
   const [pendingBooks, setPendingBooks] = useState<any[]>([]);
+  const [archivedBooks, setArchivedBooks] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [subTab, setSubTab] = useState<'books' | 'reports'>('books');
+  const [subTab, setSubTab] = useState<'books' | 'reports' | 'archived'>('books');
 
   const fetchData = async () => {
     try {
@@ -17,6 +18,9 @@ export function ModerationQueue() {
       if (subTab === 'books') {
         const res = await bookApi.getPendingBooks();
         setPendingBooks(res.data.data?.content || []);
+      } else if (subTab === 'archived') {
+        const res = await bookApi.getArchivedBooks();
+        setArchivedBooks(res.data.data?.content || []);
       } else {
         const res = await reportApi.getReports(false, { size: 50, sort: 'createdAt,desc' });
         setReports(res.data.content || res.data.data?.content || []); // Depending on the api wrapper
@@ -62,6 +66,12 @@ export function ModerationQueue() {
           onClick={() => setSubTab('books')}
         >
           <Book size={18} /> Pending Books
+        </button>
+        <button 
+          className={`pb-3 px-2 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${subTab === 'archived' ? 'border-purple-500 text-purple-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          onClick={() => setSubTab('archived')}
+        >
+          <Book size={18} /> Archived Books
         </button>
         <button 
           className={`pb-3 px-2 font-medium text-sm flex items-center gap-2 border-b-2 transition-colors ${subTab === 'reports' ? 'border-orange-500 text-orange-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
@@ -143,6 +153,38 @@ export function ModerationQueue() {
                 >
                   <X size={16} /> Reject
                 </button>
+              </div>
+            </div>
+          ))}
+        </div>
+        )
+      )}
+      
+      {subTab === 'archived' && (
+        archivedBooks.length === 0 ? (
+        <div className="text-gray-500 italic">No archived books.</div>
+      ) : (
+        <div className="space-y-4">
+          {archivedBooks.map(book => (
+            <div key={book.id} className="flex flex-col sm:flex-row items-center justify-between p-4 border rounded-lg bg-gray-50 opacity-70 hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-4 w-full sm:w-auto mb-4 sm:mb-0">
+                <div className="w-12 h-16 bg-gray-200 flex items-center justify-center rounded">
+                  {book.thumbnailPath ? (
+                    <SecureImage src={`/books/${book.id}/thumbnail`} alt="cover" className="w-full h-full object-cover rounded grayscale" />
+                  ) : (
+                    <Book className="text-gray-400" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900 line-through decoration-red-500">{book.title}</h3>
+                  <p className="text-sm text-gray-600 font-medium">by {book.author}</p>
+                  <p className="text-xs text-red-500 font-bold mt-1">STATUS: DELETED</p>
+                  <p className="text-xs text-gray-400 mt-1">Views before deletion: <span className="font-medium text-gray-600">{book.views}</span></p>
+                  <p className="text-xs text-gray-400">Uploaded by: <span className="font-medium text-gray-600">{book.uploaderUsername || 'Unknown'}</span></p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                {/* Could add a 'Restore' button here in the future if needed */}
               </div>
             </div>
           ))}

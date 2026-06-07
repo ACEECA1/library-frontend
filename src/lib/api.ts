@@ -43,6 +43,7 @@ export const bookApi = {
   getBooks: (params?: any) => api.get<ApiResponse<PaginatedData<BookResponseDTO>>>('/books', { params }),
   searchBooks: (params?: any) => api.get<ApiResponse<PaginatedData<BookResponseDTO>>>('/books/search', { params }),
   getPendingBooks: () => api.get<ApiResponse<PaginatedData<BookResponseDTO>>>('/books/pending'),
+  getArchivedBooks: () => api.get<ApiResponse<PaginatedData<BookResponseDTO>>>('/books/archived'),
   getMyUploads: (params?: any) => api.get<ApiResponse<PaginatedData<BookResponseDTO>>>('/books/my-uploads', { params }),
   approveBook: (id: string | number) => api.post(`/books/${id}/approve`),
   getBookContent: (id: string | number) => api.get(`/books/${id}/content`),
