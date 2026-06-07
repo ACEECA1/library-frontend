@@ -3,7 +3,7 @@ import { Star, BookOpen, Bookmark, MessageSquare, Flag, ArrowLeft, Loader2 } fro
 import { useState, useEffect } from "react";
 import { ReviewList } from "../components/ReviewList";
 import { CommentList } from "../components/CommentList";
-import { bookApi } from "../../../lib/api";
+import { bookApi, bookmarkApi } from "../../../lib/api";
 import { toast } from "sonner";
 import { SecureImage } from "@/components/SecureImage";
 export function BookDetails() {
@@ -18,6 +18,7 @@ export function BookDetails() {
         setLoading(true);
         const res = await bookApi.getBook(id!);
         setBook(res.data.data);
+        setBookmarked(res.data.data.isBookmarked || false);
       } catch (err) {
         toast.error("Failed to load book details");
       } finally {
@@ -26,6 +27,27 @@ export function BookDetails() {
     };
     if (id) fetchBook();
   }, [id]);
+
+  const handleBookmarkToggle = async () => {
+    try {
+      if (bookmarked) {
+        if (book.userBookmarkId) {
+          await bookmarkApi.deleteBookmark(book.userBookmarkId);
+        }
+        setBookmarked(false);
+        setBook((prev: any) => ({ ...prev, isBookmarked: false, userBookmarkId: undefined }));
+        toast.success("Bookmark removed");
+      } else {
+        const res = await bookmarkApi.addBookmark(id!);
+        setBookmarked(true);
+        setBook((prev: any) => ({ ...prev, isBookmarked: true, userBookmarkId: res.data.data.id }));
+        toast.success("Bookmarked successfully");
+      }
+    } catch (err) {
+      toast.error("Failed to update bookmark");
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -76,7 +98,7 @@ export function BookDetails() {
                   <Star fill="currentColor" size={20} />
                   <span className="font-bold text-xl text-gray-900">{book.averageRating?.toFixed(1) || '0.0'}</span>
                 </div>
-                <span className="text-xs text-gray-500">{book.reviewsCount || 0} reviews</span>
+                <span className="text-xs text-gray-500">{book.reviewCount || 0} reviews</span>
               </div>
             </div>
             <p className="text-gray-600 mt-6 leading-relaxed flex-1">
@@ -87,7 +109,7 @@ export function BookDetails() {
                 <BookOpen size={20} /> Read Now
               </Link>
               <button 
-                onClick={() => setBookmarked(!bookmarked)}
+                onClick={handleBookmarkToggle}
                 className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-bold border transition-colors ${bookmarked ? 'bg-green-50 text-[#00502D] border-green-200' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
               >
                 <Bookmark size={20} fill={bookmarked ? "currentColor" : "none"} /> 

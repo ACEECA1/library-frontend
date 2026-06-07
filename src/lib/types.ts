@@ -39,6 +39,10 @@ export interface BookResponseDTO {
   thumbnailPath: string;
   status: string;
   views: number;
+  averageRating: number;
+  reviewCount: number;
+  isBookmarked: boolean;
+  userBookmarkId?: number;
   uploaderUsername: string;
   createdAt: string;
 }

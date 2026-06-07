@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { BookMarked, UploadCloud } from 'lucide-react';
+import { BookMarked, UploadCloud, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { bookmarkApi, bookApi } from '../../../lib/api';
 import { BookResponseDTO } from '../../../lib/types';
@@ -70,10 +70,14 @@ export function MyCollection() {
                         {book.title}
                       </div>
                     )}
-                    <div className="absolute top-2 right-2">
-                      <span className={`px-2 py-1 text-xs font-bold rounded-full ${book.status === 'LIVE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                    <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                      <span className={`px-2 py-1 text-xs font-bold rounded shadow-sm ${book.status === 'LIVE' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                         {book.status}
                       </span>
+                      <div className="bg-white/90 backdrop-blur text-xs font-bold px-2 py-1 rounded shadow-sm text-gray-800 flex items-center gap-1">
+                        <Star size={12} className="text-yellow-500" fill="currentColor" />
+                        {book.averageRating ? book.averageRating.toFixed(1) : 'New'}
+                      </div>
                     </div>
                   </div>
                   <h3 className="font-semibold text-gray-900 leading-tight mb-1 group-hover:text-[#00502D] transition-colors line-clamp-2">{book.title}</h3>
