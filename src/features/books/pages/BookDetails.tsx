@@ -85,11 +85,11 @@ export function BookDetails() {
             <div className="flex items-start justify-between mb-2">
               <div>
                 <div className="flex gap-2 mb-2 flex-wrap">
-                  {book.categories?.map((cat: any) => (
-                    <span key={cat.id} className="px-2 py-1 bg-green-50 text-[#00502D] text-xs font-semibold rounded uppercase tracking-wider">{cat.name}</span>
+                  {book.categories?.map((cat: string) => (
+                    <span key={cat} className="px-2 py-1 bg-green-50 text-[#00502D] text-xs font-semibold rounded uppercase tracking-wider">{cat}</span>
                   ))}
-                  {book.tags?.map((tag: any) => (
-                    <span key={tag.id} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded uppercase tracking-wider">{tag.name}</span>
+                  {book.tags?.map((tag: string) => (
+                    <span key={tag} className="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded uppercase tracking-wider">{tag}</span>
                   ))}
                 </div>
                 <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">{book.title}</h1>

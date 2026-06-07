@@ -34,15 +34,18 @@ export function Browse() {
     const fetchBooks = async () => {
       setLoading(true);
       try {
-        const res = await bookApi.searchBooks({
-          q: queryQ,
-          category: queryCategory,
-          tag: queryTag,
-          series: querySeries,
-          sortBy: querySortBy,
-          page: queryPage,
-          size: 12
-        });
+        const hasSearchFilters = queryQ || queryCategory || queryTag || querySeries || querySortBy !== "createdAt";
+        const res = hasSearchFilters 
+          ? await bookApi.searchBooks({
+              q: queryQ,
+              category: queryCategory,
+              tag: queryTag,
+              series: querySeries,
+              sortBy: querySortBy,
+              page: queryPage,
+              size: 12
+            })
+          : await bookApi.getBooks({ page: queryPage, size: 12, sort: 'createdAt,desc' });
         setBooks(res.data.data.content || []);
         setTotalPages(res.data.data.totalPages || 0);
       } catch (err) {
