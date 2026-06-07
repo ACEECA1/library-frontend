@@ -33,6 +33,18 @@ export function NotificationItem({ notification, onMarkRead }: { notification: a
   const config = getTypeConfig(notification.type);
   const Icon = config.icon;
 
+  const getRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} min ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} h ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} d ago`;
+    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  };
+
   return (
     <div className={`group px-4 py-3 flex items-start gap-3 transition-colors border-b border-gray-100 relative ${notification.read ? 'hover:bg-gray-50' : 'bg-[#00502D]/5 hover:bg-[#00502D]/10'}`}>
       {!notification.read && (
@@ -47,7 +59,7 @@ export function NotificationItem({ notification, onMarkRead }: { notification: a
             {config.label}
           </span>
           <span className="text-[11px] text-gray-400 font-medium whitespace-nowrap ml-2 mt-0.5">
-            {new Date(notification.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+            {getRelativeTime(notification.createdAt)}
           </span>
         </div>
         <p className={`text-sm mt-1.5 ${notification.read ? 'text-gray-600' : 'text-gray-900 font-medium'} leading-relaxed`}>
