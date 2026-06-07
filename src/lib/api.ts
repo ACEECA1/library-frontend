@@ -95,8 +95,16 @@ export const adminApi = {
   getPermissions: () => api.get<ApiResponse<any[]>>('/admin/roles/permissions'),
   approveUser: (id: string | number) => api.post(`/admin/users/${id}/approve`),
   approveBulkUsers: (ids: (string | number)[]) => api.post('/admin/users/approve-bulk', ids),
+  banUser: (id: string | number, reason: string) => api.post(`/admin/users/${id}/ban`, { reason }),
+  timeoutUser: (id: string | number, minutes: number, reason: string) => api.post(`/admin/users/${id}/timeout`, { minutes, reason }),
   addRole: (data: any) => api.post<ApiResponse<RoleDTO>>('/admin/roles', data),
   getAuditLogs: (params?: any) => api.get<ApiResponse<PaginatedData<any>>>('/admin/audit-logs', { params })
+};
+
+export const reportApi = {
+  submitReport: (targetType: string, targetId: number | string, reason: string) => api.post('/reports', { targetType, targetId, reason }),
+  getReports: (resolved: boolean, params?: any) => api.get('/reports', { params: { resolved, ...params } }),
+  resolveReport: (id: number | string) => api.post(`/reports/${id}/resolve`)
 };
 
 export const notificationApi = {

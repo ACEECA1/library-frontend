@@ -4,11 +4,16 @@ import { reviewApi } from "../../../lib/api";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Star } from "lucide-react";
+import { ReportModal } from "../../../components/ReportModal";
+
 export function ReviewList({ bookId }: { bookId: string | number }) {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [rating, setRating] = useState(0);
   const [text, setText] = useState("");
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportTargetId, setReportTargetId] = useState<number | null>(null);
+  
   const fetchReviews = async () => {
     if (!bookId) return;
     try {
@@ -80,8 +85,21 @@ export function ReviewList({ bookId }: { bookId: string | number }) {
             date={formatDistanceToNow(new Date(review.createdAt), { addSuffix: true })} 
             rating={review.rating} 
             text={review.text} 
+            onReport={() => {
+              setReportTargetId(review.id);
+              setReportModalOpen(true);
+            }}
           />
         ))
+      )}
+      
+      {reportTargetId && (
+        <ReportModal 
+          isOpen={reportModalOpen}
+          onClose={() => setReportModalOpen(false)}
+          targetType="REVIEW"
+          targetId={reportTargetId}
+        />
       )}
     </div>
   );

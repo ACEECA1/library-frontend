@@ -1,5 +1,5 @@
 import { Star, Flag } from "lucide-react";
-export function ReviewItem({ name, date, rating, text, badge }: any) {
+export function ReviewItem({ name, date, rating, text, badge, onReport }: any) {
   return (
     <div className="flex gap-4 p-4 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
       <div className="w-10 h-10 bg-green-100 text-[#00502D] rounded-full flex items-center justify-center font-bold shrink-0">
@@ -20,7 +20,7 @@ export function ReviewItem({ name, date, rating, text, badge }: any) {
         </div>
         <p className="text-gray-700 text-sm">{text}</p>
         <div className="mt-3 flex justify-end text-xs text-gray-500">
-          <button className="hover:text-red-600 flex items-center gap-1"><Flag size={12} /> Report</button>
+          <button onClick={onReport} className="hover:text-red-600 flex items-center gap-1"><Flag size={12} /> Report</button>
         </div>
       </div>
     </div>

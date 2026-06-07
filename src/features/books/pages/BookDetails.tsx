@@ -6,6 +6,7 @@ import { CommentList } from "../components/CommentList";
 import { bookApi, bookmarkApi } from "../../../lib/api";
 import { toast } from "sonner";
 import { SecureImage } from "@/components/SecureImage";
+import { ReportModal } from "../../../components/ReportModal";
 export function BookDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export function BookDetails() {
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
   const [activeTab, setActiveTab] = useState<'reviews' | 'discussion'>('reviews');
+  const [reportModalOpen, setReportModalOpen] = useState(false);
   useEffect(() => {
     const fetchBook = async () => {
       try {
@@ -116,7 +118,10 @@ export function BookDetails() {
                 <Bookmark size={20} fill={bookmarked ? "currentColor" : "none"} /> 
                 {bookmarked ? 'Saved' : 'Bookmark'}
               </button>
-              <button className="p-3 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 border border-transparent transition-colors ml-auto group relative">
+              <button 
+                onClick={() => setReportModalOpen(true)}
+                className="p-3 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 border border-transparent transition-colors ml-auto group relative"
+              >
                 <Flag size={20} />
                 <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">Report Content</span>
               </button>
@@ -151,6 +156,12 @@ export function BookDetails() {
           </div>
         )}
       </div>
+      <ReportModal 
+        isOpen={reportModalOpen} 
+        onClose={() => setReportModalOpen(false)} 
+        targetType="BOOK" 
+        targetId={book.id} 
+      />
     </div>
   );
 }

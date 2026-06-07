@@ -3,10 +3,15 @@ import { CommentItem } from "./CommentItem";
 import { commentApi } from "../../../lib/api";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { ReportModal } from "../../../components/ReportModal";
+
 export function CommentList({ bookId }: { bookId: string | number }) {
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reportTargetId, setReportTargetId] = useState<number | null>(null);
+
   const fetchComments = async () => {
     if (!bookId) return;
     try {
@@ -79,8 +84,21 @@ export function CommentList({ bookId }: { bookId: string | number }) {
             downvotes={comment.downvotes}
             onUpvote={() => handleUpvote(comment.id)}
             onDownvote={() => handleDownvote(comment.id)}
+            onReport={() => {
+              setReportTargetId(comment.id);
+              setReportModalOpen(true);
+            }}
           />
         ))
+      )}
+
+      {reportTargetId && (
+        <ReportModal 
+          isOpen={reportModalOpen}
+          onClose={() => setReportModalOpen(false)}
+          targetType="COMMENT"
+          targetId={reportTargetId}
+        />
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { Outlet, Link, useNavigate, useLocation } from "react-router";
+import { Outlet, Link, useNavigate, useLocation, ScrollRestoration } from "react-router";
 import { Search, Bell, Menu, X, User, LogOut, Settings, BookMarked, Home, Library, LayoutDashboard, Check, BookOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
@@ -107,6 +107,7 @@ export function Layout() {
           </nav>
         </aside>
         <main className="flex-1 overflow-auto bg-slate-50 relative">
+          <ScrollRestoration />
           <Outlet />
         </main>
       </div>

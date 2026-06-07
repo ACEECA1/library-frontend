@@ -1,9 +1,9 @@
 import { ThumbsUp, ThumbsDown, Reply, Flag } from "lucide-react";
 export function CommentItem({ 
-  name, date, text, upvotes, downvotes, onUpvote, onDownvote 
+  name, date, text, upvotes, downvotes, onUpvote, onDownvote, onReport 
 }: { 
   name: string, date: string, text: string, upvotes: number, downvotes: number,
-  onUpvote?: () => void, onDownvote?: () => void 
+  onUpvote?: () => void, onDownvote?: () => void, onReport?: () => void
 }) {
   return (
     <div className="flex gap-4">
@@ -17,7 +17,7 @@ export function CommentItem({
               <span className="font-bold text-gray-900">{name}</span>
               <span className="text-gray-500 text-xs ml-2">{date}</span>
             </div>
-            <button className="text-gray-400 hover:text-red-500 transition-colors">
+            <button onClick={onReport} className="text-gray-400 hover:text-red-500 transition-colors">
               <Flag size={14} />
             </button>
           </div>

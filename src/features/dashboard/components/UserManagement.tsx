@@ -6,6 +6,14 @@ import { useAuth } from "../../../context/AuthContext";
 
 export function UserManagement() {
   const { hasPermission } = useAuth();
+import { useState, useEffect } from "react";
+import { Check, X, UserCog, Search, Users, UserPlus, Clock } from "lucide-react";
+import api, { adminApi } from "../../../lib/api";
+import { toast } from "sonner";
+import { useAuth } from "../../../context/AuthContext";
+
+export function UserManagement() {
+  const { hasPermission } = useAuth();
   const [activeTab, setActiveTab] = useState<'users' | 'approvals'>(hasPermission('ASSIGN_ROLE') ? 'users' : 'approvals');
   const [pendingUsers, setPendingUsers] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
@@ -15,6 +23,10 @@ export function UserManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [assignRoleUserId, setAssignRoleUserId] = useState<number | null>(null);
   const [selectedRolesForUser, setSelectedRolesForUser] = useState<string[]>([]);
+  const [banUserId, setBanUserId] = useState<number | null>(null);
+  const [timeoutUserId, setTimeoutUserId] = useState<number | null>(null);
+  const [actionReason, setActionReason] = useState("");
+  const [timeoutMinutes, setTimeoutMinutes] = useState(60);
 
   useEffect(() => {
     fetchData();
@@ -96,6 +108,32 @@ export function UserManagement() {
   const openAssignRoles = (user: any) => {
     setAssignRoleUserId(user.id);
     setSelectedRolesForUser(user.roles || []);
+  };
+
+  const handleBanUser = async () => {
+    if (!banUserId || !actionReason.trim()) return;
+    try {
+      await adminApi.banUser(banUserId, actionReason);
+      toast.success("User banned successfully");
+      setBanUserId(null);
+      setActionReason("");
+      fetchData();
+    } catch (e) {
+      toast.error("Failed to ban user");
+    }
+  };
+
+  const handleTimeoutUser = async () => {
+    if (!timeoutUserId || !actionReason.trim()) return;
+    try {
+      await adminApi.timeoutUser(timeoutUserId, timeoutMinutes, actionReason);
+      toast.success("User timed out successfully");
+      setTimeoutUserId(null);
+      setActionReason("");
+      fetchData();
+    } catch (e) {
+      toast.error("Failed to timeout user");
+    }
   };
 
   const getStatusStyle = (status: string) => {
@@ -247,9 +285,21 @@ export function UserManagement() {
                     </td>
                     <td className="px-4 py-3 text-gray-500">{new Date(u.createdAt).toLocaleDateString()}</td>
                     <td className="px-4 py-3 text-right">
-                      <button onClick={() => openAssignRoles(u)} className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors" title="Manage Roles">
-                        <UserCog size={18} />
-                      </button>
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => openAssignRoles(u)} className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors" title="Manage Roles">
+                          <UserCog size={18} />
+                        </button>
+                        {hasPermission('BAN_USER') && (
+                          <>
+                            <button onClick={() => setBanUserId(u.id)} className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors" title="Ban User">
+                              <X size={18} />
+                            </button>
+                            <button onClick={() => setTimeoutUserId(u.id)} className="p-1.5 text-orange-600 hover:bg-orange-100 rounded transition-colors" title="Timeout User">
+                              <Clock size={18} />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -296,6 +346,63 @@ export function UserManagement() {
             <div className="flex justify-end gap-3">
               <button onClick={() => setAssignRoleUserId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
               <button onClick={handleAssignRolesSubmit} className="px-4 py-2 bg-[#00502D] text-white rounded-lg font-medium hover:bg-[#003a20] transition-colors shadow-sm">Save Roles</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {banUserId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+            <h3 className="text-xl font-bold mb-4 text-red-600">Ban User</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Reason for Ban</label>
+              <textarea
+                value={actionReason}
+                onChange={(e) => setActionReason(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-[#00502D] focus:border-[#00502D]"
+                rows={3}
+                placeholder="Provide a reason for the ban..."
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setBanUserId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
+              <button onClick={handleBanUser} disabled={!actionReason.trim()} className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors disabled:opacity-50">Ban User</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {timeoutUserId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+            <h3 className="text-xl font-bold mb-4 text-orange-600">Timeout User</h3>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Timeout Duration (Minutes)</label>
+              <input
+                type="number"
+                min="1"
+                value={timeoutMinutes}
+                onChange={(e) => setTimeoutMinutes(parseInt(e.target.value) || 60)}
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-[#00502D] focus:border-[#00502D]"
+                required
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+              <textarea
+                value={actionReason}
+                onChange={(e) => setActionReason(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-[#00502D] focus:border-[#00502D]"
+                rows={3}
+                placeholder="Provide a reason..."
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setTimeoutUserId(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-medium transition-colors">Cancel</button>
+              <button onClick={handleTimeoutUser} disabled={!actionReason.trim()} className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors disabled:opacity-50">Timeout</button>
             </div>
           </div>
         </div>
