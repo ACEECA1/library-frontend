@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Shield, Plus, ChevronDown, ChevronUp, AlertCircle } from "lucide-react";
+import { Shield, Plus, ChevronDown, ChevronUp, AlertCircle, Trash2 } from "lucide-react";
 import api, { adminApi } from "../../../lib/api";
 import { toast } from "sonner";
 
@@ -63,6 +63,19 @@ export function RolesManagement() {
     }
   };
 
+  const handleDeleteRole = async (e: React.MouseEvent, roleId: number) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this role? This action cannot be undone.")) return;
+
+    try {
+      await api.delete(`/admin/roles/${roleId}`);
+      toast.success("Role deleted successfully");
+      fetchData();
+    } catch (err) {
+      toast.error("Failed to delete role. It may be assigned to users.");
+    }
+  };
+
   if (loading) return <div className="p-8 text-center text-gray-500">Loading roles and permissions...</div>;
 
   return (
@@ -106,7 +119,7 @@ export function RolesManagement() {
         <h3 className="text-lg font-semibold text-gray-800 mb-2">Existing Roles</h3>
         {roles.map(role => {
           const isExpanded = expandedRoleId === role.id;
-          const isAdmin = role.name === 'ADMIN';
+          const isAdmin = role.name === 'ADMIN' || role.name === 'USER'; // Prevent deleting fundamental roles
 
           return (
             <div key={role.id} className={`bg-white border rounded-xl overflow-hidden transition-all duration-200 ${isExpanded ? 'border-[#00502D] shadow-md' : 'border-gray-200 shadow-sm hover:border-gray-300'}`}>
@@ -123,8 +136,19 @@ export function RolesManagement() {
                     <p className="text-sm text-gray-500">{role.permissions?.length || 0} permissions assigned</p>
                   </div>
                 </div>
-                <div className="text-gray-400">
-                  {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                <div className="flex items-center gap-4">
+                  {!isAdmin && (
+                    <button 
+                      onClick={(e) => handleDeleteRole(e, role.id)}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete Role"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  )}
+                  <div className="text-gray-400">
+                    {isExpanded ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                  </div>
                 </div>
               </div>
 
@@ -135,7 +159,7 @@ export function RolesManagement() {
                       <AlertCircle className="shrink-0 mt-0.5" size={18} />
                       <div className="text-sm">
                         <p className="font-semibold mb-1">System Role</p>
-                        <p>The ADMIN role has full access to all system features. Its permissions cannot be modified.</p>
+                        <p>This is a fundamental system role. It cannot be deleted. The ADMIN role permissions also cannot be modified.</p>
                       </div>
                     </div>
                   )}
@@ -143,17 +167,19 @@ export function RolesManagement() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
                     {permissions.map(perm => {
                       const isAssigned = role.permissions?.includes(perm);
+                      const isPermDisabled = role.name === 'ADMIN';
+
                       return (
                         <label 
                           key={perm} 
-                          className={`flex items-start gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${isAssigned ? 'bg-green-50/50 border-green-200' : 'bg-gray-50 border-transparent hover:border-gray-200'} ${isAdmin ? 'opacity-70 cursor-not-allowed' : ''}`}
+                          className={`flex items-start gap-3 p-3 rounded-lg border transition-colors cursor-pointer ${isAssigned ? 'bg-green-50/50 border-green-200' : 'bg-gray-50 border-transparent hover:border-gray-200'} ${isPermDisabled ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
                           <input 
                             type="checkbox" 
                             checked={isAssigned || false}
                             onChange={() => togglePermission(role.id, perm, role.permissions || [])}
                             className="mt-1 w-4 h-4 rounded text-[#00502D] focus:ring-[#00502D] border-gray-300 disabled:opacity-50"
-                            disabled={isAdmin}
+                            disabled={isPermDisabled}
                           />
                           <div>
                             <span className={`block text-sm font-semibold ${isAssigned ? 'text-green-900' : 'text-gray-700'}`}>
