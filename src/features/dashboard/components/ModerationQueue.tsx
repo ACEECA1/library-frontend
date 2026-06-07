@@ -72,7 +72,7 @@ export function ModerationQueue() {
       </div>
 
       {subTab === 'books' && (
-      {pendingBooks.length === 0 ? (
+        pendingBooks.length === 0 ? (
         <div className="text-gray-500 italic">No pending books to moderate.</div>
       ) : (
         <div className="space-y-4">

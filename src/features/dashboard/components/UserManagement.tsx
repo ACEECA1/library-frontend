@@ -1,12 +1,4 @@
 import { useState, useEffect } from "react";
-import { Check, X, UserCog, Search, Users, UserPlus } from "lucide-react";
-import api, { adminApi } from "../../../lib/api";
-import { toast } from "sonner";
-import { useAuth } from "../../../context/AuthContext";
-
-export function UserManagement() {
-  const { hasPermission } = useAuth();
-import { useState, useEffect } from "react";
 import { Check, X, UserCog, Search, Users, UserPlus, Clock } from "lucide-react";
 import api, { adminApi } from "../../../lib/api";
 import { toast } from "sonner";
