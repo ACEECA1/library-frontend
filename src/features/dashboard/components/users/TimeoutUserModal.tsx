@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { adminApi } from "../../../../../lib/api";
+import { adminApi } from "../../../../lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
 

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { Check, X } from "lucide-react";
-import api, { adminApi } from "../../../../../lib/api";
+import api, { adminApi } from "../../../../lib/api";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { UserDTO } from "../../../../../lib/types";
+import { UserDTO } from "../../../../lib/types";
 
 export function PendingApprovalsTab({ onCountChange }: { onCountChange?: (count: number) => void }) {
   const { t } = useTranslation();

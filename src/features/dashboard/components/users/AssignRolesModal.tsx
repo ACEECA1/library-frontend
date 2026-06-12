@@ -1,9 +1,8 @@
 import { useTranslation } from "react-i18next";
-import api from "../../../../../lib/api";
-import { toast } from "sonner";
+import api from "../../../../lib/api";
 import { toast } from "sonner";
 import { useState } from "react";
-import { RoleDTO } from "../../../../../lib/types";
+import { RoleDTO } from "../../../../lib/types";
 
 export function AssignRolesModal({ 
   userId, 

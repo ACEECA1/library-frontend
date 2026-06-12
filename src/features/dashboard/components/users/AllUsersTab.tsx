@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { UserCog, Search, X, Clock } from "lucide-react";
-import { adminApi } from "../../../../../lib/api";
+import { adminApi } from "../../../../lib/api";
 import { useTranslation } from "react-i18next";
-import { UserDTO, RoleDTO } from "../../../../../lib/types";
+import { UserDTO, RoleDTO } from "../../../../lib/types";
 import { AssignRolesModal } from "./AssignRolesModal";
 import { BanUserModal } from "./BanUserModal";
 import { TimeoutUserModal } from "./TimeoutUserModal";
