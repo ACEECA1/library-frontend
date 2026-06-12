@@ -47,7 +47,7 @@ export function Register() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         <div className="bg-[#00502D] p-6 flex flex-col items-center justify-center text-white relative">
           <div className="relative z-10 flex flex-col items-center">
-            <img src={logoImg} alt="MDN Logo" className="h-12 object-contain bg-white rounded p-1 mb-3 shadow-sm" />
+            <img src={logoImg} alt="MDN Logo" className="h-20 object-contain mb-3 drop-shadow-md" />
             <h2 className="text-xl font-bold tracking-wide">{t('auth.requestAccount')}</h2>
             <p className="text-green-100 text-xs mt-1 text-center max-w-[250px]">{t('auth.requestSubtitle')}</p>
           </div>

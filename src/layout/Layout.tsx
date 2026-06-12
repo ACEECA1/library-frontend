@@ -42,9 +42,7 @@ export function Layout() {
               {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
             <Link to="/" className="flex items-center gap-3">
-              <div className="bg-white p-1 rounded-lg shadow-sm flex items-center justify-center">
-                <img src={logoImg} alt="Digital Library Logo" className="w-8 h-8 object-contain" />
-              </div>
+              <img src={logoImg} alt="Digital Library Logo" className="w-10 h-10 object-contain drop-shadow-sm" />
               <span className="font-bold text-xl hidden sm:block tracking-wide">
                 Digital Library
               </span>
@@ -101,9 +99,7 @@ export function Layout() {
           {/* Mobile Sidebar Header with Logo */}
           <div className="md:hidden flex items-center justify-between p-4 bg-[#00502D] text-white">
             <Link to="/" className="flex items-center gap-3" onClick={() => setIsSidebarOpen(false)}>
-              <div className="bg-white p-1 rounded-lg shadow-sm flex items-center justify-center">
-                <img src={logoImg} alt="Digital Library Logo" className="w-7 h-7 object-contain" />
-              </div>
+              <img src={logoImg} alt="Digital Library Logo" className="w-9 h-9 object-contain drop-shadow-sm" />
               <span className="font-bold text-lg tracking-wide">
                 Digital Library
               </span>

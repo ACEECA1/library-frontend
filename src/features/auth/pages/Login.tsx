@@ -38,7 +38,7 @@ export function Login() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
         <div className="bg-[#00502D] p-8 flex flex-col items-center justify-center text-white relative">
           <div className="relative z-10 flex flex-col items-center">
-            <img src={logoImg} alt="MDN Logo" className="h-16 object-contain bg-white rounded p-1 mb-4 shadow-lg" />
+            <img src={logoImg} alt="MDN Logo" className="h-24 object-contain mb-4 drop-shadow-md" />
             <h2 className="text-2xl font-bold tracking-wide">{t('auth.welcomeBack')}</h2>
             <p className="text-green-100 text-sm mt-1">{t('auth.systemSubtitle')}</p>
           </div>
