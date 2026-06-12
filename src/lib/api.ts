@@ -9,8 +9,20 @@ const api = axios.create({
   },
 });
 
+let clientRequestCount = 0;
+let clientRateLimitReset = Date.now() + 60000;
+
 api.interceptors.request.use(
   (config) => {
+    if (Date.now() > clientRateLimitReset) {
+      clientRequestCount = 0;
+      clientRateLimitReset = Date.now() + 60000;
+    }
+    if (clientRequestCount >= 90) {
+      return Promise.reject(new Error("Client-side rate limit exceeded. Please slow down."));
+    }
+    clientRequestCount++;
+
     const token = localStorage.getItem('accessToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -20,15 +32,87 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+const originalGet = api.get;
+const cache = new Map<string, { data: any, timestamp: number }>();
+
+api.get = async function (url: string, config?: any) {
+  const key = url + JSON.stringify(config?.params || {});
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
+    return Promise.resolve(cached.data);
+  }
+  const response = await originalGet.call(api, url, config);
+  cache.set(key, { data: response, timestamp: Date.now() });
+  return response;
+} as any;
+
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('permissions');
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+  async (error) => {
+    const originalRequest = error.config;
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise(function(resolve, reject) {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers['Authorization'] = 'Bearer ' + token;
+          return api(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('permissions');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
+      }
+
+      try {
+        const response = await axios.post(`${API_URL}/auth/refresh`, { refreshToken });
+        const newAccessToken = response.data.data.accessToken;
+        const newRefreshToken = response.data.data.refreshToken;
+        
+        localStorage.setItem('accessToken', newAccessToken);
+        localStorage.setItem('refreshToken', newRefreshToken);
+        
+        originalRequest.headers['Authorization'] = 'Bearer ' + newAccessToken;
+        processQueue(null, newAccessToken);
+        return api(originalRequest);
+      } catch (err) {
+        processQueue(err, null);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('permissions');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(err);
+      } finally {
+        isRefreshing = false;
       }
     }
     return Promise.reject(error);
@@ -49,6 +133,8 @@ export const bookApi = {
   restoreBook: (id: string | number) => api.post(`/books/${id}/restore`),
   getBookContent: (id: string | number) => api.get(`/books/${id}/content`),
   getBookStream: (id: string | number) => api.get(`/books/${id}/stream`, { responseType: 'blob' }),
+  getProgress: (id: string | number) => api.get(`/books/${id}/progress`),
+  updateProgress: (id: string | number, page: number) => api.post(`/books/${id}/progress?page=${page}`),
   uploadBook: (formData: FormData, onUploadProgress?: (progressEvent: any) => void) => api.post('/books', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
     onUploadProgress

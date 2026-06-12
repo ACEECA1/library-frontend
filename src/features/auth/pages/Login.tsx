@@ -20,8 +20,8 @@ export function Login() {
     setLoading(true);
     try {
       const response = await authApi.login({ username, password });
-      if (response.data?.data?.accessToken) {
-        await login(response.data.data.accessToken);
+      if (response.data?.data?.accessToken && response.data?.data?.refreshToken) {
+        await login(response.data.data.accessToken, response.data.data.refreshToken);
         navigate('/');
       } else {
         setError(t('auth.invalidResponse'));
@@ -66,7 +66,7 @@ export function Login() {
             <div>
               <div className="flex justify-between items-center mb-1">
                 <label className="block text-sm font-medium text-gray-700">{t('auth.password')}</label>
-                <a href="#" className="text-xs text-[#00502D] hover:underline font-medium">{t('auth.forgotPassword')}</a>
+                <span className="text-xs text-gray-500 italic">If forgotten, contact an admin. Cannot reset.</span>
               </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />

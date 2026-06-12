@@ -26,7 +26,7 @@ function LazyPage({ pageNumber, scale, onVisible }: { pageNumber: number, scale:
   }, [pageNumber, onVisible]);
 
   return (
-    <div ref={ref} style={{ minHeight: `${800 * scale}px`, marginBottom: '24px' }} className="flex justify-center w-full">
+    <div id={`page_${pageNumber}`} ref={ref} style={{ minHeight: `${800 * scale}px`, marginBottom: '24px' }} className="flex justify-center w-full">
       {isVisible ? (
         <Page pageNumber={pageNumber} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} className="shadow-2xl bg-white" />
       ) : (
@@ -89,6 +89,19 @@ export function Reader() {
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
+    if (id) {
+      bookApi.getProgress(id).then(res => {
+        const savedPage = res.data.data?.lastPageRead;
+        if (savedPage) {
+          setTimeout(() => {
+            const el = document.getElementById('page_' + savedPage);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
+          }, 500);
+        }
+      }).catch(err => console.error("Failed to fetch progress", err));
+    }
   }
 
   const toggleFullscreen = () => {
@@ -104,6 +117,15 @@ export function Reader() {
   const handleVisible = useCallback((p: number) => {
     setPageNumber(p);
   }, []);
+
+  useEffect(() => {
+    if (id && pageNumber > 1) {
+      const timeout = setTimeout(() => {
+        bookApi.updateProgress(id, pageNumber).catch(console.error);
+      }, 1000);
+      return () => clearTimeout(timeout);
+    }
+  }, [id, pageNumber]);
 
   const zoomIn = () => setScale(prev => Math.min(prev + 0.2, 3.0));
   const zoomOut = () => setScale(prev => Math.max(prev - 0.2, 0.5));

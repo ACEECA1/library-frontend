@@ -3,6 +3,16 @@ import { Shield, Plus, ChevronDown, ChevronUp, AlertCircle, Trash2 } from "lucid
 import api, { adminApi } from "../../../lib/api";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/alert-dialog";
 
 export function RolesManagement() {
   const { t } = useTranslation();
@@ -11,6 +21,7 @@ export function RolesManagement() {
   const [loading, setLoading] = useState(true);
   const [newRoleName, setNewRoleName] = useState("");
   const [expandedRoleId, setExpandedRoleId] = useState<number | null>(null);
+  const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
 
   const fetchData = async () => {
     try {
@@ -65,16 +76,20 @@ export function RolesManagement() {
     }
   };
 
-  const handleDeleteRole = async (e: React.MouseEvent, roleId: number) => {
+  const handleDeleteRole = (e: React.MouseEvent, roleId: number) => {
     e.stopPropagation();
-    if (!window.confirm(t('rolesManagement.deleteConfirm'))) return;
+    setRoleToDelete(roleId);
+  };
 
+  const confirmDeleteRole = async (roleId: number) => {
     try {
       await api.delete(`/admin/roles/${roleId}`);
       toast.success(t('rolesManagement.roleDeleted'));
+      setRoleToDelete(null);
       fetchData();
     } catch (err) {
       toast.error(t('rolesManagement.failedDelete'));
+      setRoleToDelete(null);
     }
   };
 
@@ -198,6 +213,21 @@ export function RolesManagement() {
           );
         })}
       </div>
+
+      <AlertDialog open={roleToDelete !== null} onOpenChange={(open) => !open && setRoleToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the role and remove its permissions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => roleToDelete && confirmDeleteRole(roleToDelete)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

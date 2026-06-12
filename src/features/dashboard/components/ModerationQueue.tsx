@@ -6,6 +6,17 @@ import { SecureImage } from "@/components/SecureImage";
 import { formatDistanceToNow } from "date-fns";
 import { useAuth } from "../../../context/AuthContext";
 import { useTranslation } from "react-i18next";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../../components/ui/alert-dialog";
 
 export function ModerationQueue() {
   const { t } = useTranslation();
@@ -161,22 +172,33 @@ export function ModerationQueue() {
                 >
                   <Check size={16} /> {t('moderation.approve')}
                 </button>
-                <button 
-                  onClick={async () => {
-                    if(window.confirm(t('moderation.rejectConfirm'))) {
-                      try {
-                        await bookApi.deleteBook(book.id);
-                        toast.success(t('moderation.bookRejected'));
-                        fetchData();
-                      } catch (err) {
-                        toast.error(t('moderation.failedReject'));
-                      }
-                    }
-                  }}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-red-100 text-red-600 px-4 py-2 rounded font-medium hover:bg-red-200"
-                >
-                  <X size={16} /> {t('moderation.reject')}
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-red-100 text-red-600 px-4 py-2 rounded font-medium hover:bg-red-200">
+                      <X size={16} /> {t('moderation.reject')}
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action will reject and permanently delete the book.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={async () => {
+                        try {
+                          await bookApi.deleteBook(book.id);
+                          toast.success(t('moderation.bookRejected'));
+                          fetchData();
+                        } catch (err) {
+                          toast.error(t('moderation.failedReject'));
+                        }
+                      }} className="bg-red-600 hover:bg-red-700">Reject</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             </div>
           ))}

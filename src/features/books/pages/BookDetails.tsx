@@ -11,21 +11,33 @@ import { useAuth } from "../../../context/AuthContext";
 import { EditBookModal } from "../components/EditBookModal";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../../components/ui/alert-dialog";
 
 export function BookDetails() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, permissions } = useAuth();
+  const { user } = useAuth();
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
   const [activeTab, setActiveTab] = useState(location.state?.tab || 'reviews');
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-  const canEditOrDelete = permissions?.includes("APPROVE_BOOK") || (book && user && book.uploaderUsername === user.username);
+  const canEditOrDelete = user?.permissions?.includes("APPROVE_BOOK") || (book && user && book.uploaderUsername === user.username);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -67,14 +79,12 @@ export function BookDetails() {
   };
 
   const handleDelete = async () => {
-    if (window.confirm(t('bookDetails.deleteConfirm'))) {
-      try {
-        await bookApi.deleteBook(id!);
-        toast.success(t('bookDetails.deleteSuccess'));
-        navigate("/browse");
-      } catch (err) {
-        toast.error(t('bookDetails.deleteFailed'));
-      }
+    try {
+      await bookApi.deleteBook(id!);
+      toast.success(t('bookDetails.deleteSuccess'));
+      navigate("/browse");
+    } catch (err) {
+      toast.error(t('bookDetails.deleteFailed'));
     }
   };
 
@@ -169,13 +179,26 @@ export function BookDetails() {
                     <Edit size={20} />
                     <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">{t('bookDetails.editBook')}</span>
                   </button>
-                  <button 
-                    onClick={handleDelete}
-                    className="p-3 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 border border-transparent transition-colors group relative"
-                  >
-                    <Trash2 size={20} />
-                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">{t('bookDetails.deleteBook')}</span>
-                  </button>
+                  <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+                    <AlertDialogTrigger asChild>
+                      <button className="p-3 text-gray-400 hover:text-red-500 rounded-lg hover:bg-red-50 border border-transparent transition-colors group relative">
+                        <Trash2 size={20} />
+                        <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">{t('bookDetails.deleteBook')}</span>
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete the book.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               )}
             </div>

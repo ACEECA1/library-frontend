@@ -7,26 +7,40 @@ import { EditBookModal } from "./EditBookModal";
 import { bookApi } from "../../../lib/api";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../../../components/ui/alert-dialog";
 
 export function BookCard({ book, onBookDeleted, onBookUpdated }: { book: any, onBookDeleted?: (id: number) => void, onBookUpdated?: (book: any) => void }) {
   const { t } = useTranslation();
-  const { user, permissions } = useAuth();
+  const { user } = useAuth();
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 
-  const canEditOrDelete = permissions?.includes("APPROVE_BOOK") || (user && book.uploaderUsername === user.username);
+  const canEditOrDelete = user?.permissions?.includes("APPROVE_BOOK") || (user && book.uploaderUsername === user.username);
 
-  const handleDelete = async (e: React.MouseEvent) => {
+  const handleDelete = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (window.confirm(t('bookCard.deleteConfirm'))) {
-      try {
-        await bookApi.deleteBook(book.id);
-        toast.success(t('bookCard.deleteSuccess'));
-        if (onBookDeleted) onBookDeleted(book.id);
-      } catch (err) {
-        toast.error(t('bookCard.deleteFailed'));
-      }
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await bookApi.deleteBook(book.id);
+      toast.success(t('bookCard.deleteSuccess'));
+      if (onBookDeleted) onBookDeleted(book.id);
+    } catch (err) {
+      toast.error(t('bookCard.deleteFailed'));
     }
+    setDeleteConfirmOpen(false);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
@@ -93,6 +107,21 @@ export function BookCard({ book, onBookDeleted, onBookUpdated }: { book: any, on
           }}
         />
       )}
+
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the book.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

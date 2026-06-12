@@ -58,12 +58,12 @@ export function AdminDashboard() {
         </div>
       )}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 min-h-[800px]">
-        {activeTab === 'users' && <UserManagement />}
-        {activeTab === 'roles' && <RolesManagement />}
-        {activeTab === 'content' && <ContentManagement />}
-        {activeTab === 'categories' && <CategoryManagement />}
-        {activeTab === 'moderation' && <ModerationQueue />}
-        {activeTab === 'audit' && <AuditLogs />}
+        {hasUsers && <div style={{ display: activeTab === 'users' ? 'block' : 'none' }}><UserManagement /></div>}
+        {hasRoles && <div style={{ display: activeTab === 'roles' ? 'block' : 'none' }}><RolesManagement /></div>}
+        {hasContent && <div style={{ display: activeTab === 'content' ? 'block' : 'none' }}><ContentManagement /></div>}
+        {hasCategories && <div style={{ display: activeTab === 'categories' ? 'block' : 'none' }}><CategoryManagement /></div>}
+        {hasModeration && <div style={{ display: activeTab === 'moderation' ? 'block' : 'none' }}><ModerationQueue /></div>}
+        {hasAudit && <div style={{ display: activeTab === 'audit' ? 'block' : 'none' }}><AuditLogs /></div>}
       </div>
     </div>
   );
