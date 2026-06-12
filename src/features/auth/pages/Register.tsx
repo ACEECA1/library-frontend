@@ -109,6 +109,9 @@ export function Register() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
+              rightElement={
+                <span className="text-xs text-amber-600 font-semibold">{t('auth.savePasswordWarning', 'Save securely! No recovery.')}</span>
+              }
             />
             <InputField
               label={t('auth.confirmPassword')}
