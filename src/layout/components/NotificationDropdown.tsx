@@ -33,13 +33,15 @@ export function NotificationDropdown() {
         if (message.body) {
           const newNotif = JSON.parse(message.body);
           setNotifications(prev => [newNotif, ...prev.filter(n => n.id !== newNotif.id)]);
-          toast(newNotif.message, {
-            duration: 1500,
-            action: {
-              label: 'View',
-              onClick: () => handleNotificationClick(newNotif)
-            }
-          });
+          toast.custom((t) => (
+            <div className="w-full sm:w-[350px] bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden pointer-events-auto">
+              <NotificationItem 
+                notification={newNotif} 
+                onMarkRead={(id) => { markAsRead(id); toast.dismiss(t); }} 
+                onClick={() => { handleNotificationClick(newNotif); toast.dismiss(t); }} 
+              />
+            </div>
+          ), { duration: 6000 });
         }
       });
     }, (error: any) => {

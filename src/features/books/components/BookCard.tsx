@@ -73,7 +73,7 @@ export function BookCard({ book, onBookDeleted, onBookUpdated }: { book: any, on
           </div>
           
           {canEditOrDelete && (
-            <div className="absolute top-2 left-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="absolute top-2 left-2 flex flex-col gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
               <button onClick={handleEditClick} className="p-1.5 bg-white/90 hover:bg-blue-50 text-blue-600 rounded shadow backdrop-blur transition-colors border border-gray-100" title={t('bookCard.editBook')}>
                 <Edit size={14} />
               </button>

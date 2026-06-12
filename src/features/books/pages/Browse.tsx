@@ -23,6 +23,7 @@ export function Browse() {
   const [categories, setCategories] = useState<any[]>([]);
   const [tags, setTags] = useState<any[]>([]);
   const [seriesList, setSeriesList] = useState<any[]>([]);
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -82,7 +83,7 @@ export function Browse() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8">
-      <aside className="w-full md:w-72 shrink-0">
+      <aside className={`w-full md:w-72 shrink-0 ${isFiltersOpen ? 'block' : 'hidden md:block'}`}>
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-4">
           <div className="flex items-center justify-between mb-6 border-b pb-4">
             <div className="flex items-center gap-2 font-bold text-lg text-gray-900">
@@ -168,11 +169,19 @@ export function Browse() {
       </aside>
       <div className="flex-1">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center gap-3">
-            <div className="bg-green-100 p-2 rounded-lg text-[#00502D]">
-              <BookOpen size={24} />
+          <div className="flex items-center justify-between w-full sm:w-auto">
+            <div className="flex items-center gap-3">
+              <div className="bg-green-100 p-2 rounded-lg text-[#00502D]">
+                <BookOpen size={24} />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">{t('browse.catalog')}</h1>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">{t('browse.catalog')}</h1>
+            <button 
+              onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+              className="md:hidden flex items-center gap-2 bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100"
+            >
+              <Filter size={18} />
+            </button>
           </div>
           <div className="flex items-center gap-4 w-full sm:w-auto">
             <form onSubmit={handleSearchSubmit} className="relative flex-1 sm:w-64">

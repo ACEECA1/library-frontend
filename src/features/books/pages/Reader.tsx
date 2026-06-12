@@ -132,23 +132,23 @@ export function Reader() {
 
   return (
     <div ref={containerRef} className="h-screen flex flex-col bg-gray-900 text-gray-300 overflow-hidden">
-      <div className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4 shrink-0">
-        <div className="flex items-center gap-4">
+      <div className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-2 sm:px-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-4">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-700 rounded-lg transition-colors" title={t('reader.back')}>
             <ArrowLeft size={20} className="text-gray-300" />
           </button>
-          <div className="h-6 w-px bg-gray-600"></div>
-          <h1 className="font-medium text-white truncate max-w-xs md:max-w-md">{bookTitle}</h1>
+          <div className="hidden sm:block h-6 w-px bg-gray-600"></div>
+          <h1 className="font-medium text-white truncate max-w-[100px] sm:max-w-xs md:max-w-md text-sm sm:text-base">{bookTitle}</h1>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1 sm:gap-4">
           {numPages && (
-            <div className="flex items-center gap-2 text-sm bg-gray-700 px-3 py-1 rounded-md">
+            <div className="hidden sm:flex items-center gap-2 text-sm bg-gray-700 px-3 py-1 rounded-md">
               <span>{pageNumber} / {numPages}</span>
             </div>
           )}
           <button onClick={zoomOut} className="p-2 hover:bg-gray-700 rounded-lg" title={t('reader.zoomOut')}><ZoomOut size={20} /></button>
           <button onClick={zoomIn} className="p-2 hover:bg-gray-700 rounded-lg" title={t('reader.zoomIn')}><ZoomIn size={20} /></button>
-          <button onClick={toggleFullscreen} className="p-2 hover:bg-gray-700 rounded-lg" title={isFullscreen ? t('reader.exitFullscreen') : t('reader.fullscreen')}>
+          <button onClick={toggleFullscreen} className="p-2 hover:bg-gray-700 rounded-lg hidden sm:block" title={isFullscreen ? t('reader.exitFullscreen') : t('reader.fullscreen')}>
             {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
           </button>
         </div>

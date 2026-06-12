@@ -36,13 +36,23 @@ const originalGet = api.get;
 const cache = new Map<string, { data: any, timestamp: number }>();
 
 api.get = async function (url: string, config?: any) {
+  const noCacheKeywords = ['/progress', '/auth', '/notifications', '/admin', '/bookmarks'];
+  const shouldCache = !noCacheKeywords.some(kw => url.includes(kw));
+  
   const key = url + JSON.stringify(config?.params || {});
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
-    return Promise.resolve(cached.data);
+  
+  if (shouldCache) {
+    const cached = cache.get(key);
+    if (cached && Date.now() - cached.timestamp < 5 * 60 * 1000) {
+      return Promise.resolve(cached.data);
+    }
   }
+
   const response = await originalGet.call(api, url, config);
-  cache.set(key, { data: response, timestamp: Date.now() });
+  
+  if (shouldCache) {
+    cache.set(key, { data: response, timestamp: Date.now() });
+  }
   return response;
 } as any;
 
