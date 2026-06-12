@@ -3,6 +3,7 @@ import { ArrowLeft, ZoomIn, ZoomOut, Maximize, Minimize, FileText } from "lucide
 import { useState, useEffect, useRef, useCallback } from "react";
 import { bookApi } from "../../../lib/api";
 import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/TextLayer.css';
 import { useTranslation } from 'react-i18next';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -28,7 +29,7 @@ function LazyPage({ pageNumber, scale, onVisible }: { pageNumber: number, scale:
   return (
     <div id={`page_${pageNumber}`} ref={ref} style={{ minHeight: `${800 * scale}px`, marginBottom: '24px' }} className="flex justify-center w-full">
       {isVisible ? (
-        <Page pageNumber={pageNumber} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} className="shadow-2xl bg-white" />
+        <Page pageNumber={pageNumber} scale={scale} renderTextLayer={true} renderAnnotationLayer={false} className="shadow-2xl bg-white" />
       ) : (
         <div className="bg-gray-800 animate-pulse" style={{ width: `${600 * scale}px`, height: `${800 * scale}px` }} />
       )}
