@@ -11,6 +11,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { EditBookModal } from "../components/EditBookModal";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
+import { BookResponseDTO } from "../../../lib/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +30,7 @@ export function BookDetails() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const [book, setBook] = useState<any>(null);
+  const [book, setBook] = useState<BookResponseDTO | any>(null);
   const [loading, setLoading] = useState(true);
   const [bookmarked, setBookmarked] = useState(false);
   const [activeTab, setActiveTab] = useState(location.state?.tab || 'reviews');
@@ -188,14 +189,14 @@ export function BookDetails() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogTitle>{t('bookDetails.deleteConfirmTitle', 'Are you absolutely sure?')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete the book.
+                          {t('bookDetails.deleteConfirmDesc', 'This action cannot be undone. This will permanently delete the book.')}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                        <AlertDialogCancel>{t('bookDetails.cancel', 'Cancel')}</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">{t('bookDetails.delete', 'Delete')}</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>

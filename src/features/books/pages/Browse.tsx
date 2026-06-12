@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router";
 import { Filter, Star, Search, SlidersHorizontal, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { metadataApi, bookApi } from "../../../lib/api";
+import { BookResponseDTO, MetadataDTO } from "../../../lib/types";
 import { BookCard } from "../components/BookCard";
 
 export function Browse() {
@@ -16,13 +17,13 @@ export function Browse() {
   const queryPage = parseInt(searchParams.get("page") || "0", 10);
   
   const [search, setSearch] = useState(queryQ);
-  const [books, setBooks] = useState<any[]>([]);
+  const [books, setBooks] = useState<BookResponseDTO[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   
-  const [categories, setCategories] = useState<any[]>([]);
-  const [tags, setTags] = useState<any[]>([]);
-  const [seriesList, setSeriesList] = useState<any[]>([]);
+  const [categories, setCategories] = useState<MetadataDTO[]>([]);
+  const [tags, setTags] = useState<MetadataDTO[]>([]);
+  const [seriesList, setSeriesList] = useState<MetadataDTO[]>([]);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   useEffect(() => {

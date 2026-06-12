@@ -74,3 +74,8 @@ export interface RoleDTO {
   name: string;
   permissions: any[];
 }
+
+export interface MetadataDTO {
+  id: number;
+  name: string;
+}

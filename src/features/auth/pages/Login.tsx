@@ -5,6 +5,7 @@ import { authApi } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
 import logoImg from "../../../imports/mq1jioql-ANP.png";
 import { useTranslation } from "react-i18next";
+import { InputField } from "../../../components/ui/InputField";
 
 export function Login() {
   const { t } = useTranslation();
@@ -49,37 +50,27 @@ export function Login() {
             </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.username')}</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                  placeholder={t('auth.enterUsername')}
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-gray-700">{t('auth.password')}</label>
-                <span className="text-xs text-gray-500 italic">If forgotten, contact an admin. Cannot reset.</span>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
+            <InputField 
+              label={t('auth.username')}
+              type="text"
+              icon={<User size={18} />}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder={t('auth.enterUsername')}
+              required
+            />
+            <InputField 
+              label={t('auth.password')}
+              type="password"
+              icon={<Lock size={18} />}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+              rightElement={
+                <span className="text-xs text-gray-500 italic">{t('auth.forgotPasswordHint', 'If forgotten, contact an admin. Cannot reset.')}</span>
+              }
+            />
             <button disabled={loading} type="submit" className="w-full bg-[#00502D] text-white py-3 rounded-lg font-bold hover:bg-green-800 transition-colors shadow-md mt-2 disabled:opacity-70">
               {loading ? t('auth.signingIn') : t('auth.signIn')}
             </button>

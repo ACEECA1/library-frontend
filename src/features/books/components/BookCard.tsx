@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { Star, BookOpen, Eye, Edit, Trash2 } from "lucide-react";
+import { BookResponseDTO } from "../../../lib/types";
 import { SecureImage } from "@/components/SecureImage";
 import { useAuth } from "../../../context/AuthContext";
 import { useState } from "react";
@@ -18,7 +19,7 @@ import {
   AlertDialogTitle,
 } from "../../../components/ui/alert-dialog";
 
-export function BookCard({ book, onBookDeleted, onBookUpdated }: { book: any, onBookDeleted?: (id: number) => void, onBookUpdated?: (book: any) => void }) {
+export function BookCard({ book, onBookDeleted, onBookUpdated }: { book: BookResponseDTO | any, onBookDeleted?: (id: number) => void, onBookUpdated?: (book: BookResponseDTO) => void }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [editModalOpen, setEditModalOpen] = useState(false);

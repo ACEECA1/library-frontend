@@ -3,13 +3,14 @@ import { BookOpen, Star, Clock, ChevronRight, Upload, ShieldAlert, Users } from 
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { bookApi, API_URL } from "../../../lib/api";
+import { BookResponseDTO } from "../../../lib/types";
 import { BookCard } from "../components/BookCard";
 export function Home() {
   const { t } = useTranslation();
   const role = localStorage.getItem('userRole') || 'user';
   const userName = localStorage.getItem('userName') || 'User';
-  const [trending, setTrending] = useState<any[]>([]);
-  const [recent, setRecent] = useState<any[]>([]);
+  const [trending, setTrending] = useState<BookResponseDTO[]>([]);
+  const [recent, setRecent] = useState<BookResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchBooks = async () => {
@@ -91,7 +92,7 @@ export function Home() {
     </div>
   );
 }
-function BookGrid({ items, onUpdate }: { items: any[], onUpdate?: (updated: any) => void }) {
+function BookGrid({ items, onUpdate }: { items: BookResponseDTO[], onUpdate?: (updated: BookResponseDTO) => void }) {
   const { t } = useTranslation();
   if (!items || items.length === 0) return <p className="text-gray-500">{t('home.noBooksFound')}</p>;
   return (

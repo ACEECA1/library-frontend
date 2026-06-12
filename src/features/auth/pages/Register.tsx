@@ -4,6 +4,7 @@ import { useState } from "react";
 import { authApi } from "../../../lib/api";
 import logoImg from "../../../imports/mq1jioql-ANP.png";
 import { useTranslation } from "react-i18next";
+import { InputField } from "../../../components/ui/InputField";
 
 export function Register() {
   const { t } = useTranslation();
@@ -64,90 +65,60 @@ export function Register() {
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.firstName')}</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input 
-                    type="text" 
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                    placeholder={t('auth.firstName')}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.lastName')}</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                  <input 
-                    type="text" 
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                    placeholder={t('auth.lastName')}
-                    required
-                  />
-                </div>
-              </div>
+              <InputField
+                label={t('auth.firstName')}
+                type="text"
+                icon={<User size={18} />}
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder={t('auth.firstName')}
+                required
+              />
+              <InputField
+                label={t('auth.lastName')}
+                type="text"
+                icon={<User size={18} />}
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder={t('auth.lastName')}
+                required
+              />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.dateOfBirth')}</label>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="date" 
-                  value={dateOfBirth}
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.username')}</label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="text" 
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                  placeholder={t('auth.desiredUsername')}
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.password')}</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('auth.confirmPassword')}</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input 
-                  type="password" 
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00502D] focus:border-transparent transition-shadow"
-                  placeholder="••••••••"
-                  required
-                />
-              </div>
-            </div>
+            <InputField
+              label={t('auth.dateOfBirth')}
+              type="date"
+              icon={<Calendar size={18} />}
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+              required
+            />
+            <InputField
+              label={t('auth.username')}
+              type="text"
+              icon={<User size={18} />}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder={t('auth.desiredUsername')}
+              required
+            />
+            <InputField
+              label={t('auth.password')}
+              type="password"
+              icon={<Lock size={18} />}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+            />
+            <InputField
+              label={t('auth.confirmPassword')}
+              type="password"
+              icon={<Lock size={18} />}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              required
+            />
             <button disabled={loading || success} type="submit" className="w-full bg-[#00502D] text-white py-3 rounded-lg font-bold hover:bg-green-800 transition-colors shadow-md mt-4 disabled:opacity-70">
               {loading ? t('auth.submitting') : t('auth.submitRequest')}
             </button>
