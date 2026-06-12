@@ -3,7 +3,7 @@ import { Lock, User } from "lucide-react";
 import { useState } from "react";
 import { authApi } from "../../../lib/api";
 import { useAuth } from "../../../context/AuthContext";
-import logoImg from "../../../imports/mq1jioql-ANP.png";
+import logoImg from "../../../imports/image.svg";
 import { useTranslation } from "react-i18next";
 import { InputField } from "../../../components/ui/InputField";
 

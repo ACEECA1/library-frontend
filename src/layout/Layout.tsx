@@ -5,7 +5,7 @@ import { LanguageSwitcher } from "./components/LanguageSwitcher";
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { NotificationDropdown } from "./components/NotificationDropdown";
-import logoImg from "../imports/mq1jioql-ANP.png";
+import logoImg from "../imports/image.svg";
 export function Layout() {
   const { t } = useTranslation();
   const { user, logout, hasPermission } = useAuth();
