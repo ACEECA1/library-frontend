@@ -48,13 +48,8 @@ export function MyCollection() {
                     uploaderUsername: bookmark.bookUploaderUsername,
                     views: bookmark.bookViews
                   }}
-                  onBookDeleted={(id) => setBookmarks(bookmarks.filter(b => b.bookId !== id))}
-                  onBookUpdated={(updated) => setBookmarks(bookmarks.map(b => b.bookId === updated.id ? { 
-                    ...b, 
-                    bookTitle: updated.title, 
-                    bookThumbnailPath: updated.thumbnailPath,
-                    bookAuthor: updated.author
-                  } : b))}
+                  onBookUpdated={(updatedBook) => setBookmarks(bookmarks.map(b => b.bookId === updatedBook.id ? { ...b, ...updatedBook } : b))}
+                  onBookDeleted={(id) => setBookmarks(bookmarks.map(b => b.bookId === id ? { ...b, status: 'DELETED' } : b))}
                 />
               ))}
             </div>
@@ -75,8 +70,8 @@ export function MyCollection() {
                 <BookCard 
                   key={book.id} 
                   book={book} 
-                  onBookDeleted={(id) => setUploads(uploads.filter(b => b.id !== id))}
-                  onBookUpdated={(updated) => setUploads(uploads.map(b => b.id === updated.id ? updated : b))}
+                  onBookDeleted={(id) => setUploads(uploads.map(b => b.id === id ? { ...b, status: 'DELETED' } : b))}
+                  onBookUpdated={(updatedBook) => setUploads(uploads.map(b => b.id === updatedBook.id ? updatedBook : b))}
                 />
               ))}
             </div>

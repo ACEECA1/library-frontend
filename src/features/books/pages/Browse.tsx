@@ -228,8 +228,8 @@ export function Browse() {
                 <BookCard 
                   key={book.id} 
                   book={book} 
-                  onBookDeleted={(id) => setBooks(books.filter(b => b.id !== id))}
-                  onBookUpdated={(updated) => setBooks(books.map(b => b.id === updated.id ? updated : b))}
+                  onBookDeleted={(id) => setBooks(books.map(b => b.id === id ? { ...b, status: 'DELETED' } : b))}
+                  onBookUpdated={(updatedBook) => setBooks(books.map(b => b.id === updatedBook.id ? updatedBook : b))}
                 />
               ))}
             </div>
