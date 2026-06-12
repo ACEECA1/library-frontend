@@ -16,7 +16,7 @@ export function ReportModal({ isOpen, onClose, targetType, targetId }: ReportMod
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!reason.trim()) return;
 

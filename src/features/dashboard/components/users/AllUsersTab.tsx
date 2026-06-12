@@ -39,7 +39,7 @@ export function AllUsersTab({ hasBanPermission }: { hasBanPermission: boolean })
     }
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     fetchData();
   };

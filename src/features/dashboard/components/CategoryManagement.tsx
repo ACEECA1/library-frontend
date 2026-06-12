@@ -33,7 +33,7 @@ export function CategoryManagement() {
     fetchData();
   }, []);
 
-  const handleCreateCategory = async (e: React.FormEvent) => {
+  const handleCreateCategory = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newCatName.trim()) return;
     try {
@@ -56,7 +56,7 @@ export function CategoryManagement() {
     }
   };
 
-  const handleCreateTag = async (e: React.FormEvent) => {
+  const handleCreateTag = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newTagName.trim()) return;
     try {
@@ -79,7 +79,7 @@ export function CategoryManagement() {
     }
   };
 
-  const handleCreateSeries = async (e: React.FormEvent) => {
+  const handleCreateSeries = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newSeriesName.trim()) return;
     try {

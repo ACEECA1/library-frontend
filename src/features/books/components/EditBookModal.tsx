@@ -77,7 +77,7 @@ export function EditBookModal({ isOpen, onClose, book, onSuccess }: EditBookModa
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!title || !author) return;
 

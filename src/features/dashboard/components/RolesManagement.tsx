@@ -43,7 +43,7 @@ export function RolesManagement() {
     fetchData();
   }, []);
 
-  const handleCreateRole = async (e: React.FormEvent) => {
+  const handleCreateRole = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!newRoleName.trim()) return;
     try {

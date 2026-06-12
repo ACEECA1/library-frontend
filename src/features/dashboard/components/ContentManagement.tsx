@@ -52,7 +52,7 @@ export function ContentManagement() {
     }
   };
 
-  const handleUpload = async (e: React.FormEvent) => {
+  const handleUpload = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!bookFile || !title || !author) return;
     

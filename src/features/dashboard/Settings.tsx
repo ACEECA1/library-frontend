@@ -18,7 +18,7 @@ export function Settings() {
   });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const handleProfileSubmit = async (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage('');
     setError('');
@@ -29,7 +29,7 @@ export function Settings() {
       setError(err.response?.data?.message || t('settings.profileUpdateFailed'));
     }
   };
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage('');
     setError('');

@@ -72,7 +72,7 @@ export function Browse() {
     setSearchParams(newParams);
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     updateParam("q", search);
   };
