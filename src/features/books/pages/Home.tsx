@@ -2,13 +2,16 @@ import { Link } from "react-router";
 import { BookOpen, Star, Clock, ChevronRight, Upload, ShieldAlert, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../../../context/AuthContext";
 import { bookApi, API_URL } from "../../../lib/api";
 import { BookResponseDTO } from "../../../lib/types";
 import { BookCard } from "../components/BookCard";
+
 export function Home() {
   const { t } = useTranslation();
-  const role = localStorage.getItem('userRole') || 'user';
-  const userName = localStorage.getItem('userName') || 'User';
+  const { user } = useAuth();
+  const role = user?.roles?.[0] || 'user';
+  const userName = user ? `${user.firstName} ${user.lastName}` : 'User';
   const [trending, setTrending] = useState<BookResponseDTO[]>([]);
   const [recent, setRecent] = useState<BookResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
